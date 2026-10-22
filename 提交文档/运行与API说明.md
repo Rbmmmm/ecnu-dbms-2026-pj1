@@ -1,12 +1,12 @@
 # 运行与 API 说明
 
-本说明介绍第一阶段源代码的安装、页面操作和 API 调用。应用使用 Python 3.11、FastAPI、PyMongo、Jinja2 与原生 JavaScript，已在 MongoDB Community 8.0.32 上完成验证。安装和回归的具体结果见《测试用例与结果》。
+本说明介绍第一阶段源代码的安装、页面操作和 API 调用。应用使用 Python 3.11、FastAPI、PyMongo、Jinja2 与原生 JavaScript，已在 MongoDB Community 8.0.32 上验证。安装和回归结果见《测试用例与结果》。
 
 ## 1. 安装与启动
 
-运行前需要准备 Python 3.11，并确认配置中的 MongoDB 可以连接。课程环境仍按“先只读检查阿里云，连接失败后使用本地数据库”的顺序处理；应用不会自动切换连接。项目此前已在本机 MongoDB 上完成验证，启动前仍须检查服务状态。数据库名使用本人已确认的名称；域名解析失败发生在认证之前，不能据此判断密码错误。
+运行需要 Python 3.11 和可连接的 MongoDB。课程环境先只读检查阿里云，连接失败后使用本地数据库，应用不会自动切换连接。项目已在本机 MongoDB 上验证，启动前仍须检查服务状态，并使用本人已确认的数据库名。域名解析失败发生在认证之前，不能据此判断密码错误。
 
-在新取得的项目根目录创建独立 Python 环境：
+获取源码后，在项目根目录创建独立 Python 环境：
 
 ```bash
 python3.11 -m venv .venv
@@ -15,9 +15,9 @@ python -m pip install -r requirements.lock.txt
 python -m pip check
 ```
 
-这里的 `python3.11` 应指向本机已有的 Python 3.11；课程已有 `contemporary_db` 时，也可以激活该环境后以 `python -m venv .venv` 创建独立环境。测试、应用与依赖版本由 `requirements.lock.txt` 固定，不需要升级其他课程环境。
+`python3.11` 应指向本机已有的 Python 3.11；若已有课程环境 `contemporary_db`，也可激活后用 `python -m venv .venv` 创建独立环境。应用和测试所需的依赖版本由 `requirements.lock.txt` 固定，无须升级其他课程环境。
 
-新项目尚无 `.env` 时，复制 `.env.example` 为 `.env`，填写以下配置；已有配置不能直接覆盖。真实 `.env` 不提交 GitHub，不放入提交附件。
+项目尚无 `.env` 时，将 `.env.example` 复制为 `.env`，填写以下配置。已有配置不能直接覆盖；真实 `.env` 不提交 GitHub，也不放入提交附件。
 
 ```dotenv
 SURVEY_MONGO_URI=mongodb://127.0.0.1:27017/
@@ -26,14 +26,14 @@ SURVEY_ORIGIN=http://127.0.0.1:8000
 SURVEY_SECURE_COOKIE=false
 ```
 
-`SURVEY_DB` 必须替换为本人已确认的数据库名。应用集合均以 `survey_` 开头。上例用于本机 HTTP；HTTPS 环境应把 `SURVEY_SECURE_COOKIE` 设为 `true`。Origin 必须与实际浏览器地址的协议、主机、端口完全一致，`localhost` 与 `127.0.0.1` 不可混用。
+`SURVEY_DB` 必须替换为本人已确认的数据库名，应用集合均以 `survey_` 开头。上例用于本机 HTTP；HTTPS 环境应把 `SURVEY_SECURE_COOKIE` 设为 `true`。Origin 必须与浏览器实际访问地址的协议、主机、端口完全一致，`localhost` 与 `127.0.0.1` 不可混用。
 
 ```bash
 python scripts/init_db.py
 python scripts/run.py
 ```
 
-默认打开 `http://127.0.0.1:8000`。`GET /health` 返回 200 和 `status=ready` 表示连接、validator 与索引检查通过；未知存量 schema 版本在启动初始化时检查。停止应用使用 Ctrl+C，不需要停止 MongoDB。
+默认访问 `http://127.0.0.1:8000`。`GET /health` 返回 200 和 `status=ready` 表示连接、validator 与索引检查通过；未知存量 schema 版本在启动初始化时检查。使用 Ctrl+C 停止应用，无须停止 MongoDB。
 
 如果 8000 端口已有服务，可将配置中的 `SURVEY_ORIGIN` 改为 `http://127.0.0.1:18000`，并从项目根目录执行：
 
@@ -41,24 +41,24 @@ python scripts/run.py
 python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 18000
 ```
 
-此时使用 `http://127.0.0.1:18000` 访问。不要使用固定监听 8000 的 `scripts/run.py` 启动 18000 配置。初始化创建缺失集合和索引，不清空已有数据；已有契约不符时失败，需要先查明差异，不应通过删除业务库解决。
+配置后通过 `http://127.0.0.1:18000` 访问。`scripts/run.py` 固定监听 8000，不适用于 18000 配置。初始化会创建缺失的集合和索引，不清空已有数据；契约不符时会失败，应先查明差异，不应删除业务库。
 
 ## 2. 页面操作
 
 1. 在注册页创建账号，再登录。用户名为 3—32 个基本汉字、英文字母、数字或下划线；英文字母统一转小写。密码为 8—128 个 Unicode 码点。
 2. 在“我的问卷”创建草稿，填写标题、说明、匿名与重复设置、截止时间。添加单选、多选、文本、数字题，配置选项、校验和有序跳转规则。
-3. 保存草稿后修复发布问题，再发布。发布后的题意与填写设置冻结，管理页提供分享链接、截止调整、关闭和统计入口。
-4. 填写者从 `/survey/{id}` 登录进入，逐题回答或明确跳过非必答题；可以返回已访问题修改，系统重新计算路径。
-5. 到达结束位置后先显示确认页，再显式提交。可匿名的问卷默认实名；同一次填写返回修改会保留匿名选择。网络结果未知时保留原内容重试，避免新建一次填写。
+3. 保存草稿，修复发布检查发现的问题后再发布。发布后的题意与填写设置冻结，管理页提供分享链接、截止调整、关闭和统计入口。
+4. 填写者通过 `/survey/{id}` 进入问卷，登录后逐题回答或明确跳过非必答题。返回已访问题修改时，系统会重新计算路径。
+5. 回答结束后先进入确认页，再明确提交。可匿名的问卷默认实名；同一次填写返回修改会保留匿名选择。网络结果未知时保留原内容重试，避免新建一次填写。
 6. 创建者查看整卷和单题统计，文本、数字内容可翻页。允许重复时成功后可以“再填一份”，新一份默认实名。
 
-截止时间在页面统一按北京时间输入和显示。手动关闭不可重开；已到期但未关闭的问卷可以延长或清除截止。刷新填写页不保证恢复未提交输入或原提交键，尤其允许重复问卷应避免把刷新当成原提交重试。
+页面中的截止时间统一按北京时间输入和显示。手动关闭不可重开；已到期但未关闭的问卷可以延长或清除截止。刷新填写页不保证恢复未提交输入或原提交键，允许重复填写时尤其应避免用刷新代替原提交重试。
 
 ## 3. API 共同约定
 
 业务 API 前缀为 `/api/v1`，共 17 个操作；加上 `/health` 共 18 个应用 API 操作。`/docs` 和 `/openapi.json` 提供当前接口模型；页面、静态文件和这些文档入口不计入业务操作数量。
 
-除注册、登录和幂等退出外，所有业务 API 都需要登录 cookie。管理、统计和内容接口进一步检查创建者身份，他人资源统一返回 404。填写接口要求登录，并且草稿不可读。匿名内容采用字段白名单，不能返回填写者 ID、提交键、摘要或会话信息。
+除注册、登录和幂等退出外，所有业务 API 都需要登录 cookie。管理、统计和内容接口还会检查创建者身份，对他人的资源统一返回 404。填写接口要求登录，草稿不可读。匿名内容通过字段白名单限制，不返回填写者 ID、提交键、摘要或会话信息。
 
 所有 POST、PUT、PATCH、DELETE 请求都需要：
 
@@ -68,17 +68,21 @@ Content-Type: application/json
 X-Survey-Request: 1
 ```
 
-示例使用 18000，实际调用需改为配置中的 Origin。退出同样需要这些头，发送空 JSON 对象即可。浏览器自动携带同源 cookie；脚本客户端需要保存登录响应的 cookie。服务没有启用跨域访问。
+示例端口为 18000，实际调用时须使用配置中的 Origin。退出请求也需要这些头，发送空 JSON 对象即可。浏览器自动携带同源 cookie；脚本客户端需要保存登录响应中的 cookie。服务未启用跨域访问。
 
-ObjectId 对外为 24 位小写十六进制字符串，题目、选项和提交键使用标准 UUID 字符串。数字题答案、上下限和数字规则 operand 使用十进制字符串，例如 `"18.0"`，不能发送 JSON 数值 `18`。未知字段及不正确类型拒绝；客户端不能提交 owner、respondent、状态、路径或统计结果来替代服务端计算。
+ObjectId 对外表示为 24 位小写十六进制字符串，题目、选项和提交键使用标准 UUID 字符串。数字题答案、上下限和数字规则 operand 使用十进制字符串，例如 `"18.0"`，不能发送 JSON 数值 `18`。接口拒绝未知字段和不正确的类型；客户端不能提交 owner、respondent、状态、路径或统计结果来替代服务端计算。
 
-数字必须有限且能够无损转为 Decimal128；有效系数最多 34 位，并受 Decimal128 指数范围限制。超范围、不精确、NaN、Infinity、布尔值均拒绝。数值等于整数的 `"18.0"` 满足整数约束，0 是有效答案。时间为带时区的 ISO 8601 字符串或 null，例如 `"2026-10-22T23:00:00+08:00"`；服务端统一为 UTC 毫秒，截止等于受理时刻即拒收。示例日期仅说明格式，设置时必须晚于服务器当前时间。
+数字必须有限且能够无损转为 Decimal128，有效系数最多 34 位，并受 Decimal128 指数范围限制。超范围、不精确、NaN、Infinity、布尔值均拒绝。数值等于整数的 `"18.0"` 满足整数约束，0 是有效答案。
 
-工程上限：请求体 1 MiB，持久问卷或答卷 8 MiB；最多 100 题，每题 100 选项、50 规则；标题 200、说明 5000、题干 1000、选项 200、文本答案 10000 码点。分页 `offset` 为 0—9223372036854775807，`limit` 为 1—100，默认 20；按 `created_at`、`_id` 均降序。新增数据期间 offset 分页可能移动，不保证快照视图。
+时间为带时区的 ISO 8601 字符串或 null，例如 `"2026-10-22T23:00:00+08:00"`。服务端统一为 UTC 毫秒，截止等于受理时刻即拒收。示例日期仅说明格式，设置时必须晚于服务器当前时间。
+
+工程上限：请求体 1 MiB，持久问卷或答卷 8 MiB；最多 100 题，每题 100 选项、50 规则；标题 200、说明 5000、题干 1000、选项 200、文本答案 10000 码点。
+
+分页 `offset` 为 0—9223372036854775807，`limit` 为 1—100，默认 20；按 `created_at`、`_id` 均降序。分页期间新增数据可能改变条目位置，不保证快照视图。
 
 ## 4. 接口清单
 
-下表业务路径均省略 `/api/v1`，唯独 `/health` 使用完整路径。创建与草稿的配置字段为 `title, description, allow_anonymous, allow_repeat, deadline_at`；草稿另传 `revision, questions`。
+下表的业务路径均省略 `/api/v1`，`/health` 使用完整路径。创建与草稿的配置字段为 `title, description, allow_anonymous, allow_repeat, deadline_at`；草稿另传 `revision, questions`。
 
 | 方法与路径 | 请求 | 成功返回与主要限制 |
 |---|---|---|
@@ -101,13 +105,13 @@ ObjectId 对外为 24 位小写十六进制字符串，题目、选项和提交�
 | GET `/surveys/{sid}/questions/{qid}/statistics` | 无 | 200 指定题目的同口径摘要；未知题 404 |
 | GET `/surveys/{sid}/questions/{qid}/contents` | `offset,limit` 查询参数 | 200 `{question_id,kind,items,total,offset,limit}`；只支持 text/number，选择题 422 |
 
-管理视图将 `_id` 转为 `id`，移除 `owner_id`，附带 `share_url`、`publish_issues`。草稿允许业务配置暂未完成，成功保存不等于可以发布。GET `/fill` 在关闭或到期后仍可返回配置，使用 `accepting=false` 表示当前不接收；没有独立的拒收原因字段。正式提交会返回明确错误码。
+管理视图将 `_id` 转为 `id`，移除 `owner_id`，附带 `share_url`、`publish_issues`。尚未完成的业务配置可以保存为草稿，发布前仍须通过检查。GET `/fill` 在关闭或到期后仍可返回配置，以 `accepting=false` 表示当前不接收，没有独立的拒收原因字段；正式提交会返回明确错误码。
 
 收据仅含 `response_id, survey_id, accepted_at`。内容分页每条包含 `value, created_at, anonymous`；只有实名条目另含 `username`，不返回答卷 ID 或填写者账号 ID。
 
 ## 5. 完整请求示例
 
-以下示例演示从注册到提交的请求格式。调用时使用前一步实际返回的 ID 和 revision；示意 ID、账号和日期不代表测试执行记录。真实测试输入与输出见《测试用例与结果》。
+以下示例展示从注册到提交的请求格式。调用时须使用前一步实际返回的 ID 和 revision；示例中的 ID、账号和日期仅用于说明格式，实际测试输入与输出见《测试用例与结果》。
 
 ```http
 POST /api/v1/auth/register
@@ -118,7 +122,7 @@ X-Survey-Request: 1
 {"username":"api_example","password":"DemoOnly_12345"}
 ```
 
-登录发送同一请求体至 `/api/v1/auth/login`，保存响应 cookie。这里的密码只用于说明格式，不是项目或数据库凭据。随后创建问卷：
+将同一请求体发送至 `/api/v1/auth/login` 登录，并保存响应 cookie。示例密码仅用于说明格式，不是项目或数据库凭据。随后创建问卷：
 
 ```json
 {
@@ -152,9 +156,9 @@ X-Survey-Request: 1
 }
 ```
 
-无并发修改时保存后 revision 为 2，发布请求为 `POST /api/v1/surveys/{sid}/publish`，请求体 `{"revision":2}`；一般调用应始终使用最近响应中的 revision，不自行累加猜测。
+无并发修改时，保存后 revision 为 2，发布请求为 `POST /api/v1/surveys/{sid}/publish`，请求体 `{"revision":2}`。调用时应始终使用最近响应中的 revision，不自行累加猜测。
 
-填写者登录后，GET `/api/v1/fill/{sid}` 读取配置。评估请求 POST 至 `/api/v1/fill/{sid}/evaluate`：
+填写者登录后，用 GET `/api/v1/fill/{sid}` 读取配置，再将评估请求 POST 至 `/api/v1/fill/{sid}/evaluate`：
 
 ```json
 {
@@ -188,7 +192,7 @@ X-Survey-Request: 1
 }
 ```
 
-实际客户端每次有意新填写生成新的随机 UUID；结果未知时保留原键与原内容重试。非必答题明确空答写成 `{"题目ID":null}`，不能直接缺少此 key。多选值为选项 ID 数组，文本值为字符串；后台只把最终路径的非空答案写入 MongoDB。
+客户端每次开始一份新填写时生成新的随机 UUID，结果未知时保留原键与原内容重试。非必答题留空也须写成 `{"题目ID":null}`，不能省略对应的 key。多选值为选项 ID 数组，文本值为字符串；后台只将最终路径的非空答案写入 MongoDB。
 
 ### 错误响应
 
@@ -202,13 +206,13 @@ X-Survey-Request: 1
 }
 ```
 
-上例是错误结构说明。400 表示 JSON 格式或请求内容类型错误；401 表示登录失败或会话失效；403 表示来源校验失败；404 表示资源不存在或无管理权限；409 表示版本、状态、提交键或重复冲突；413 表示请求或文档超限；422 表示配置、类型或答案不合法；503 表示数据库不可用或契约未就绪。错误不回显密码、Mongo URI 或堆栈。
+上例展示错误响应结构。400 表示 JSON 格式或请求内容类型错误；401 表示登录失败或会话失效；403 表示来源校验失败；404 表示资源不存在或无管理权限；409 表示版本、状态、提交键或重复冲突；413 表示请求或文档超限；422 表示配置、类型或答案不合法；503 表示数据库不可用或契约未就绪。错误不回显密码、Mongo URI 或堆栈。
 
-常见业务码包括 `REVISION_OR_STATE_CONFLICT`、`INVALID_CONFIGURATION`、`STALE_BRANCH_ANSWERS`、`KEY_REUSED_WITH_DIFFERENT_CONTENT`、`ALREADY_SUBMITTED`、`NOT_ACCEPTING`。evaluate 的结构合法请求可用 200 返回题目级 `errors`，调用者仍须检查 `ready_to_submit` 和 `errors`，不能仅凭 HTTP 200 显示可提交。
+常见业务码包括 `REVISION_OR_STATE_CONFLICT`、`INVALID_CONFIGURATION`、`STALE_BRANCH_ANSWERS`、`KEY_REUSED_WITH_DIFFERENT_CONTENT`、`ALREADY_SUBMITTED`、`NOT_ACCEPTING`。evaluate 的结构合法请求可能以 200 返回题目级 `errors`，调用者须同时检查 `ready_to_submit` 和 `errors`，不能仅凭 HTTP 200 显示可提交。
 
 ## 6. 测试与基线入口
 
-测试使用本机 `127.0.0.1:27017` 的真实 MongoDB，自动创建并清理经过校验的 `survey_test_<run_id>` 隔离数据库，不使用业务 `.env` 指向的数据库。在项目根目录执行 API 与数据库测试：
+测试需要本机 `127.0.0.1:27017` 的真实 MongoDB，会自动创建并清理经过校验的 `survey_test_<run_id>` 隔离数据库，不使用业务 `.env` 指向的数据库。在项目根目录执行 API 与数据库测试：
 
 ```bash
 python -m pytest tests/test_p2.py tests/test_w007.py tests/test_w008.py tests/test_p4.py -o addopts= -q
@@ -230,7 +234,7 @@ node artifacts/browser-tools/node_modules/playwright/cli.js install chromium
 export SURVEY_PLAYWRIGHT_MODULE="$PWD/artifacts/browser-tools/node_modules/playwright"
 ```
 
-然后重新执行网页测试命令。已有工具时，可用 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM` 指定路径。浏览器工具仅供网页测试使用，应用和 API 测试不需要安装。
+安装后再执行网页测试命令。已有工具时，可用 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM` 指定路径。浏览器工具仅供网页测试使用，启动应用和运行 API 测试无须安装。
 
 v1 样本的新建和恢复使用以下命令：
 
@@ -239,6 +243,6 @@ python scripts/v1_baseline.py --output artifacts/v1-check
 python scripts/v1_baseline.py --restore 提交文档/附件/v1-baseline.json --output artifacts/v1-restore
 ```
 
-每个输出目录须尚不存在。脚本在新隔离库中核对 4 个合成账号、3 份问卷和 8 份答卷，检查题意、字段、路径、统计、应用重启读取及未知 schema 版本拒绝。恢复使用新生成的临时测试会话，基线文件不包含明文密码或会话 cookie。
+每个输出目录须尚不存在。脚本在新隔离库中核对 4 个合成账号、3 份问卷和 8 份答卷的题意、字段、路径和统计，并检查应用重启后的读取结果，以及未知 schema 版本是否被拒绝。恢复使用新生成的临时测试会话，基线文件不包含明文密码或会话 cookie。
 
 接口依据：[app/main.py](../app/main.py)、[app/schemas.py](../app/schemas.py)、[app/config.py](../app/config.py)；锁定依赖见 [requirements.lock.txt](../requirements.lock.txt)。
