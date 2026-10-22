@@ -1,0 +1,38 @@
+{
+  "missing_file": {
+    "rejected": true,
+    "reason": "package file list differs from fixed manifest"
+  },
+  "tampered_file": {
+    "rejected": true,
+    "reason": "package content hash mismatch: requirements.lock.txt"
+  },
+  "tampered_baseline": {
+    "rejected": true,
+    "reason": "package content hash mismatch: 提交文档/附件/v1-baseline.json"
+  },
+  "missing_review": {
+    "rejected": true,
+    "reason": [
+      "user wording and contribution review not recorded",
+      "user review does not bind the current submission files",
+      "explicit user review evidence missing",
+      "confirmed GitHub repository URL missing"
+    ]
+  },
+  "ai_review": {
+    "rejected": true,
+    "reason": [
+      "user wording and contribution review not recorded",
+      "user review does not bind the current submission files",
+      "explicit user review evidence missing",
+      "confirmed GitHub repository URL missing"
+    ]
+  },
+  "stale_review": {
+    "rejected": true,
+    "reason": [
+      "user review does not bind the current submission files"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "test_databases_remaining": 0,
+  "test_server_pid": 38842,
+  "temporary_dbpath": "artifacts/github-upload-20261022/mongo",
+  "original_course_service": "disabled and not loaded, unchanged",
+  "original_business_data": "not opened by this run",
+  "temporary_server_shutdown": "SIGTERM sent to verified mongod process"
+}
