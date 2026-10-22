@@ -1,0 +1,74 @@
+[
+  {
+    "id": "00000000-0000-0000-0000-000000000065",
+    "kind": "single",
+    "title": "Q1 单选",
+    "required": false,
+    "validation": {},
+    "rules": [],
+    "options": [
+      {
+        "id": "00000000-0000-0000-0000-0000000000c9",
+        "text": "A"
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000000ca",
+        "text": "B"
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000000cb",
+        "text": "C"
+      }
+    ]
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000066",
+    "kind": "multiple",
+    "title": "Q2 水果",
+    "required": false,
+    "validation": {
+      "min_choices": 1,
+      "max_choices": 2
+    },
+    "rules": [],
+    "options": [
+      {
+        "id": "00000000-0000-0000-0000-0000000000d3",
+        "text": "苹果"
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000000d4",
+        "text": "香蕉"
+      },
+      {
+        "id": "00000000-0000-0000-0000-0000000000d5",
+        "text": "葡萄"
+      }
+    ]
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000067",
+    "kind": "text",
+    "title": "Q3 文本",
+    "required": false,
+    "validation": {
+      "min_length": 1,
+      "max_length": 10
+    },
+    "options": [],
+    "rules": []
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000068",
+    "kind": "number",
+    "title": "Q4 数字",
+    "required": false,
+    "validation": {
+      "min_value": "0",
+      "max_value": "120",
+      "integer_only": true
+    },
+    "options": [],
+    "rules": []
+  }
+]

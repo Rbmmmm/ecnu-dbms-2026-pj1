@@ -1,0 +1,311 @@
+{
+  "stage": "P6",
+  "gates": [
+    "full_p4",
+    "clean_install",
+    "v1_restore",
+    "documents",
+    "user_review",
+    "github_delivery"
+  ],
+  "requirements": {
+    "R-001": {
+      "sources": [
+        "app/db.py",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-002": {
+      "sources": [
+        "requirements.lock.txt",
+        "app/main.py",
+        "app/domain.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-003": {
+      "sources": [
+        "app/static/app.js",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-004": {
+      "sources": [
+        "提交文档/系统与数据库设计.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ]
+    },
+    "R-005": {
+      "sources": [
+        "app/db.py",
+        "app/schemas.py",
+        "app/domain.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-006": {
+      "sources": [
+        "app/main.py",
+        "app/schemas.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-007": {
+      "sources": [
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-008": {
+      "sources": [
+        "app/main.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-009": {
+      "sources": [
+        "app/main.py",
+        "app/time_values.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-010": {
+      "sources": [
+        "app/main.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-011": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-012": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-013": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-014": {
+      "sources": [
+        "app/decimal_values.py",
+        "app/schemas.py",
+        "app/domain.py",
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-015": {
+      "sources": [
+        "app/domain.py",
+        "app/schemas.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-016": {
+      "sources": [
+        "app/domain.py",
+        "app/static/app.js",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-017": {
+      "sources": [
+        "app/main.py",
+        "app/db.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-018": {
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-019": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-020": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-021": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-022": {
+      "sources": [
+        "app/statistics.py",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ]
+    },
+    "R-023": {
+      "sources": [
+        "tests/test_p2.py",
+        "tests/test_w007.py",
+        "tests/test_w008.py",
+        "tests/test_p4.py",
+        "scripts/p4_audit.py",
+        "scripts/verify.py",
+        "提交文档/测试用例与结果.md"
+      ],
+      "evidence": [
+        "full_p4",
+        "documents"
+      ]
+    },
+    "R-024": {
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/schemas.py",
+        "scripts/verify.py"
+      ],
+      "evidence": [
+        "full_p4",
+        "clean_install",
+        "v1_restore",
+        "github_delivery"
+      ]
+    },
+    "R-025": {
+      "sources": [
+        "提交文档/运行与API说明.md",
+        "提交文档/系统与数据库设计.md",
+        "提交文档/关键逻辑说明.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ]
+    },
+    "R-026": {
+      "sources": [
+        "提交文档/项目完成报告.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ]
+    },
+    "R-027": {
+      "sources": [
+        "开发文档/04-AI记录与提交文档.md",
+        "提交文档/AI使用日志.md"
+      ],
+      "evidence": [
+        "full_p4",
+        "documents",
+        "user_review"
+      ]
+    },
+    "R-028": {
+      "sources": [
+        "提交文档/AI使用日志.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ]
+    },
+    "R-029": {
+      "sources": [
+        "提交文档/提交清单.md",
+        "提交文档/附件/v1-baseline.json",
+        "scripts/v1_baseline.py"
+      ],
+      "evidence": [
+        "documents",
+        "user_review",
+        "v1_restore"
+      ]
+    },
+    "R-030": {
+      "sources": [
+        "提交文档/提交清单.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review",
+        "github_delivery"
+      ]
+    }
+  }
+}

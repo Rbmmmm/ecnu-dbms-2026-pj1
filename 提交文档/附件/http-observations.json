@@ -1,0 +1,617 @@
+{
+  "f01": {
+    "management": {
+      "id": "6ad224e6962a713504c3f8ef",
+      "title": "v1 F01 四题型统计",
+      "description": "合成验收样本",
+      "allow_anonymous": true,
+      "allow_repeat": true,
+      "deadline_at": null,
+      "schema_version": 1,
+      "state": "published",
+      "revision": 3,
+      "content_version": 1,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "kind": "single",
+          "title": "Q1 单选",
+          "required": false,
+          "validation": {},
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000c9",
+              "text": "A"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000ca",
+              "text": "B"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000cb",
+              "text": "C"
+            }
+          ],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "kind": "multiple",
+          "title": "Q2 水果",
+          "required": false,
+          "validation": {
+            "min_choices": 1,
+            "max_choices": 2
+          },
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000d3",
+              "text": "苹果"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d4",
+              "text": "香蕉"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d5",
+              "text": "葡萄"
+            }
+          ],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000067",
+          "kind": "text",
+          "title": "Q3 文本",
+          "required": false,
+          "validation": {
+            "min_length": 1,
+            "max_length": 10
+          },
+          "options": [],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000068",
+          "kind": "number",
+          "title": "Q4 数字",
+          "required": false,
+          "validation": {
+            "min_value": "0",
+            "max_value": "120",
+            "integer_only": true
+          },
+          "options": [],
+          "rules": []
+        }
+      ],
+      "created_at": "2026-10-16T13:21:42.856000+00:00",
+      "updated_at": "2026-10-16T13:21:42.861000+00:00",
+      "published_at": "2026-10-16T13:21:42.861000+00:00",
+      "closed_at": null,
+      "share_url": "/survey/6ad224e6962a713504c3f8ef",
+      "publish_issues": []
+    },
+    "statistics": {
+      "survey_id": "6ad224e6962a713504c3f8ef",
+      "title": "v1 F01 四题型统计",
+      "submission_count": 5,
+      "respondent_count": 3,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "title": "Q1 单选",
+          "kind": "single",
+          "respondent_count": 2,
+          "submission_count": 4,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000c9",
+              "text": "A",
+              "respondent_count": 2,
+              "submission_count": 2
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000ca",
+              "text": "B",
+              "respondent_count": 1,
+              "submission_count": 1
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000cb",
+              "text": "C",
+              "respondent_count": 1,
+              "submission_count": 1
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "title": "Q2 水果",
+          "kind": "multiple",
+          "answered_submission_count": 3,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000d3",
+              "text": "苹果",
+              "selection_count": 2
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d4",
+              "text": "香蕉",
+              "selection_count": 2
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d5",
+              "text": "葡萄",
+              "selection_count": 0
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000067",
+          "title": "Q3 文本",
+          "kind": "text",
+          "answered_submission_count": 3
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000068",
+          "title": "Q4 数字",
+          "kind": "number",
+          "answered_submission_count": 3,
+          "average": "10",
+          "average_display": "10.00"
+        }
+      ]
+    },
+    "contents": {
+      "00000000-0000-0000-0000-000000000067": [
+        {
+          "value": "丙",
+          "created_at": "2026-10-16T13:21:42.880000+00:00",
+          "anonymous": true
+        },
+        {
+          "value": "乙",
+          "created_at": "2026-10-16T13:21:42.872000+00:00",
+          "anonymous": true
+        },
+        {
+          "value": "甲",
+          "created_at": "2026-10-16T13:21:42.864000+00:00",
+          "anonymous": false,
+          "username": "v1_u1"
+        }
+      ],
+      "00000000-0000-0000-0000-000000000068": [
+        {
+          "value": "20",
+          "created_at": "2026-10-16T13:21:42.880000+00:00",
+          "anonymous": true
+        },
+        {
+          "value": "10",
+          "created_at": "2026-10-16T13:21:42.872000+00:00",
+          "anonymous": true
+        },
+        {
+          "value": "0",
+          "created_at": "2026-10-16T13:21:42.864000+00:00",
+          "anonymous": false,
+          "username": "v1_u1"
+        }
+      ]
+    }
+  },
+  "f02": {
+    "management": {
+      "id": "6ad224e6962a713504c3f8f5",
+      "title": "v1 F02 分支",
+      "description": "合成验收样本",
+      "allow_anonymous": true,
+      "allow_repeat": true,
+      "deadline_at": null,
+      "schema_version": 1,
+      "state": "published",
+      "revision": 3,
+      "content_version": 1,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "kind": "single",
+          "title": "J1 分支选择",
+          "required": true,
+          "validation": {},
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-00000000000b",
+              "text": "A"
+            },
+            {
+              "id": "00000000-0000-0000-0000-00000000000c",
+              "text": "B"
+            },
+            {
+              "id": "00000000-0000-0000-0000-00000000000d",
+              "text": "结束"
+            }
+          ],
+          "rules": [
+            {
+              "op": "eq",
+              "operand": "00000000-0000-0000-0000-00000000000b",
+              "target": "00000000-0000-0000-0000-000000000003"
+            },
+            {
+              "op": "eq",
+              "operand": "00000000-0000-0000-0000-00000000000c",
+              "target": "00000000-0000-0000-0000-000000000002"
+            },
+            {
+              "op": "eq",
+              "operand": "00000000-0000-0000-0000-00000000000d",
+              "target": "END"
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000002",
+          "kind": "multiple",
+          "title": "J2 多选条件",
+          "required": true,
+          "validation": {
+            "min_choices": null,
+            "max_choices": null
+          },
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-000000000015",
+              "text": "x"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000016",
+              "text": "y"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000017",
+              "text": "z"
+            }
+          ],
+          "rules": [
+            {
+              "op": "any",
+              "operand": [
+                "00000000-0000-0000-0000-000000000015"
+              ],
+              "target": "00000000-0000-0000-0000-000000000004"
+            },
+            {
+              "op": "all",
+              "operand": [
+                "00000000-0000-0000-0000-000000000015",
+                "00000000-0000-0000-0000-000000000016"
+              ],
+              "target": "00000000-0000-0000-0000-000000000005"
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000003",
+          "kind": "number",
+          "title": "J3 年龄",
+          "required": false,
+          "validation": {
+            "min_value": "0",
+            "max_value": "120",
+            "integer_only": true
+          },
+          "options": [],
+          "rules": [
+            {
+              "op": "gte",
+              "operand": "18",
+              "target": "00000000-0000-0000-0000-000000000005"
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000004",
+          "kind": "text",
+          "title": "J4 完成说明",
+          "required": true,
+          "validation": {
+            "min_length": 1,
+            "max_length": 10
+          },
+          "options": [],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "kind": "text",
+          "title": "J5 补充",
+          "required": false,
+          "validation": {
+            "min_length": 1,
+            "max_length": 10
+          },
+          "options": [],
+          "rules": []
+        }
+      ],
+      "created_at": "2026-10-16T13:21:42.901000+00:00",
+      "updated_at": "2026-10-16T13:21:42.904000+00:00",
+      "published_at": "2026-10-16T13:21:42.904000+00:00",
+      "closed_at": null,
+      "share_url": "/survey/6ad224e6962a713504c3f8f5",
+      "publish_issues": []
+    },
+    "statistics": {
+      "survey_id": "6ad224e6962a713504c3f8f5",
+      "title": "v1 F02 分支",
+      "submission_count": 2,
+      "respondent_count": 1,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "title": "J1 分支选择",
+          "kind": "single",
+          "respondent_count": 1,
+          "submission_count": 2,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-00000000000b",
+              "text": "A",
+              "respondent_count": 1,
+              "submission_count": 1
+            },
+            {
+              "id": "00000000-0000-0000-0000-00000000000c",
+              "text": "B",
+              "respondent_count": 1,
+              "submission_count": 1
+            },
+            {
+              "id": "00000000-0000-0000-0000-00000000000d",
+              "text": "结束",
+              "respondent_count": 0,
+              "submission_count": 0
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000002",
+          "title": "J2 多选条件",
+          "kind": "multiple",
+          "answered_submission_count": 1,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-000000000015",
+              "text": "x",
+              "selection_count": 1
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000016",
+              "text": "y",
+              "selection_count": 1
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000017",
+              "text": "z",
+              "selection_count": 0
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000003",
+          "title": "J3 年龄",
+          "kind": "number",
+          "answered_submission_count": 1,
+          "average": "18",
+          "average_display": "18.00"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000004",
+          "title": "J4 完成说明",
+          "kind": "text",
+          "answered_submission_count": 1
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000005",
+          "title": "J5 补充",
+          "kind": "text",
+          "answered_submission_count": 0
+        }
+      ]
+    },
+    "contents": {
+      "00000000-0000-0000-0000-000000000003": [
+        {
+          "value": "18",
+          "created_at": "2026-10-16T13:21:42.906000+00:00",
+          "anonymous": false,
+          "username": "v1_u1"
+        }
+      ],
+      "00000000-0000-0000-0000-000000000004": [
+        {
+          "value": "完成",
+          "created_at": "2026-10-16T13:21:42.908000+00:00",
+          "anonymous": false,
+          "username": "v1_u1"
+        }
+      ],
+      "00000000-0000-0000-0000-000000000005": []
+    }
+  },
+  "once": {
+    "management": {
+      "id": "6ad224e6962a713504c3f8f8",
+      "title": "v1 每账号一次",
+      "description": "合成验收样本",
+      "allow_anonymous": true,
+      "allow_repeat": false,
+      "deadline_at": null,
+      "schema_version": 1,
+      "state": "published",
+      "revision": 3,
+      "content_version": 1,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "kind": "single",
+          "title": "Q1 单选",
+          "required": false,
+          "validation": {},
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000c9",
+              "text": "A"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000ca",
+              "text": "B"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000cb",
+              "text": "C"
+            }
+          ],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "kind": "multiple",
+          "title": "Q2 水果",
+          "required": false,
+          "validation": {
+            "min_choices": 1,
+            "max_choices": 2
+          },
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000d3",
+              "text": "苹果"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d4",
+              "text": "香蕉"
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d5",
+              "text": "葡萄"
+            }
+          ],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000067",
+          "kind": "text",
+          "title": "Q3 文本",
+          "required": false,
+          "validation": {
+            "min_length": 1,
+            "max_length": 10
+          },
+          "options": [],
+          "rules": []
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000068",
+          "kind": "number",
+          "title": "Q4 数字",
+          "required": false,
+          "validation": {
+            "min_value": "0",
+            "max_value": "120",
+            "integer_only": true
+          },
+          "options": [],
+          "rules": []
+        }
+      ],
+      "created_at": "2026-10-16T13:21:42.910000+00:00",
+      "updated_at": "2026-10-16T13:21:42.913000+00:00",
+      "published_at": "2026-10-16T13:21:42.913000+00:00",
+      "closed_at": null,
+      "share_url": "/survey/6ad224e6962a713504c3f8f8",
+      "publish_issues": []
+    },
+    "statistics": {
+      "survey_id": "6ad224e6962a713504c3f8f8",
+      "title": "v1 每账号一次",
+      "submission_count": 1,
+      "respondent_count": 1,
+      "questions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "title": "Q1 单选",
+          "kind": "single",
+          "respondent_count": 0,
+          "submission_count": 0,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000c9",
+              "text": "A",
+              "respondent_count": 0,
+              "submission_count": 0
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000ca",
+              "text": "B",
+              "respondent_count": 0,
+              "submission_count": 0
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000cb",
+              "text": "C",
+              "respondent_count": 0,
+              "submission_count": 0
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "title": "Q2 水果",
+          "kind": "multiple",
+          "answered_submission_count": 0,
+          "options": [
+            {
+              "id": "00000000-0000-0000-0000-0000000000d3",
+              "text": "苹果",
+              "selection_count": 0
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d4",
+              "text": "香蕉",
+              "selection_count": 0
+            },
+            {
+              "id": "00000000-0000-0000-0000-0000000000d5",
+              "text": "葡萄",
+              "selection_count": 0
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000067",
+          "title": "Q3 文本",
+          "kind": "text",
+          "answered_submission_count": 0
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000068",
+          "title": "Q4 数字",
+          "kind": "number",
+          "answered_submission_count": 0,
+          "average": null,
+          "average_display": "暂无数据"
+        }
+      ]
+    },
+    "contents": {
+      "00000000-0000-0000-0000-000000000067": [],
+      "00000000-0000-0000-0000-000000000068": []
+    }
+  }
+}

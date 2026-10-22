@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-15T11:21:52.430058+00:00",
+  "command": [
+    "scripts/verify.py",
+    "--stage",
+    "W007",
+    "--self-test"
+  ],
+  "stage": "W007",
+  "result": "passed_counterexamples_only",
+  "checks": {},
+  "run_id": "a4ce3657a9e64156b269b8cb53c2bfa5",
+  "version": {
+    "head": "eee15378ce4681e39472a864f19d9c08ea140841",
+    "dirty": true,
+    "status": "M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/01-\\346\\216\\250\\350\\277\\233\\350\\256\\241\\345\\210\\222\\344\\270\\216\\351\\252\\214\\346\\224\\266.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/03-\\346\\265\\213\\350\\257\\225\\344\\270\\216\\350\\257\\201\\346\\215\\256\\347\\256\\241\\347\\220\\206.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/04-AI\\350\\256\\260\\345\\275\\225\\344\\270\\216\\346\\217\\220\\344\\272\\244\\346\\226\\207\\346\\241\\243.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/06-\\350\\246\\201\\346\\261\\202\\345\\257\\271\\347\\205\\247\\344\\270\\216\\346\\257\\217\\350\\275\\256\\346\\243\\200\\346\\237\\245.md\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-END\\347\\241\\256\\350\\256\\244.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-pytest.xml\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\345\\233\\236\\351\\200\\200\\345\\200\\231\\351\\200\\211\\345\\244\\215\\347\\224\\250.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\347\\247\\273\\345\\212\\250\\351\\241\\265\\351\\235\\242.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\347\\274\\226\\350\\276\\221\\351\\205\\215\\347\\275\\256.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\350\\207\\252\\345\\212\\250\\351\\252\\214\\346\\224\\266.json\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\351\\252\\214\\346\\224\\266.md\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\351\\252\\214\\350\\257\\201\\345\\231\\250\\345\\217\\215\\344\\276\\213.json\"",
+    "file_sha256": {
+      "app/.DS_Store": "f8f2c383f8377e3131158add8836d955fc4dc5cc164abd0e65cd193449275edb",
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/config.py": "60c054fc02b4eab4a51ce18c48cddb5f646a66e0670a2dc4cf89bc7330530016",
+      "app/db.py": "173686d176707034b326b944388f7fdf77e1fc1bcc94324ecb03d21a8bf16a5f",
+      "app/decimal_values.py": "2074bff8a580cb96a9ab6bfb2e924065baaad15961b598225cce202e8694f19b",
+      "app/domain.py": "de1335b044ef9d226323d4c7bd9b1b390e1ec7a33f7819a0dca10a3e41c818f6",
+      "app/main.py": "c1164142a74096df7bd1ac63868b43750b807d04dae3202055cac5cf0cd3caab",
+      "app/schemas.py": "fad006bed86f136165abe62996a36b39edce4aba0dfea3c6f7ded6588e7851ab",
+      "app/static/app.js": "8ff06b45c9006028d15e664e049819a44a880132f155cdd97fdddb86b2e374ba",
+      "app/static/style.css": "aca9a69d1f464e982155029f0feb5c86025b602700271d792d9e9b130050349d",
+      "app/statistics.py": "4c7d7818a0cdff9f52649cd0f4dd640b3ac5d382206cfcc85ec32257e15f8427",
+      "app/templates/page.html": "78352d634c6c0eac7ec3cede5a6c66f7edb88cc6578305b194be5d6521f81533",
+      "scripts/.DS_Store": "4d6412b3f14a304267e8be64fa426b0dfb81bc7cf9bc821027d94c0615fd945c",
+      "scripts/init_db.py": "7dfecb9a30208852db07419f9cd2bf41d67c2eb41fe9214b08c03c7bd740d561",
+      "scripts/run.py": "cfb1fb3f0f3f0ab9f2696947578f6672aa5cd92b762bc16362a716754e3018b6",
+      "scripts/test_server.py": "d7e5068cb48c18396fca3c9e1ae05745cbeec6c85329d0670cab838b12f319ee",
+      "scripts/verify.py": "4e2d4153e4960ad13f2e2afc629c141afd46b9288f8a50f4df5d36559908611e",
+      "tests/.DS_Store": "bd33d9da6267c9175c659891397716f934aa17b1621e94dabcab6380dcbed6b5",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/browser.cjs": "ef34c3ca52ff7c472f6740c2a519e7d398f20dca61dd6a8aa6dd478a358da71b",
+      "tests/browser_w007.cjs": "0447079bec2cc2bc5b70f7df2e8af8bffa21074597d0ca849191baa4c4b06f6e",
+      "tests/conftest.py": "80b6abe042da65e6bb4c0d628064b0b16ed96d3681bcfab6d9dc5052892bfe75",
+      "tests/fixtures_f02.py": "48f0bca2a811a93f09edccdc5822904eec01d36d76d5e44fd083f485b5aba3b7",
+      "tests/manual-review.json": "979619dae930d885e0b929fb7bd79bed9850648c087f080235305d1437dbc75e",
+      "tests/original-materials.json": "4112ee0e86901036f41629930f8d81bf5b6f51783f77d366b33a795eb366a680",
+      "tests/requirements-map-w007.json": "51fa7367b5da3c396687a165fe3256725306d5a428d2f8c0617fb5009ad646ae",
+      "tests/requirements-map.json": "01e5b2bfa012679d59e83799712e12540305748f4254dd098ec5a6f7649c7dae",
+      "tests/test_p2.py": "6c64ddabc871ad434cdd83942f18f93129a802a9de7dc5161b0fe8f18e71198e",
+      "tests/test_w007.py": "e0813fd67271ef3d4dc70e3f5b4c2187182dddace1f132ac8b54b1b5b4c6898e",
+      "requirements.lock.txt": "d3d01114c041e5a8a95cb8d907df118e4a808461ced73b2713a09d0321c07177",
+      "README.md": "c164ae81ab14d1ef234499a05abe4771bef47b174ba673f8326e287d153da31a"
+    }
+  },
+  "counterexamples": [
+    {
+      "case": "missing_mapping",
+      "returncode": 1,
+      "output": "{\"result\": \"failed\", \"evidence\": \"/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/cf86e189c9cd49d48d5aef1c77f1c2bf/report.json\", \"failure\": \"W007 required requirement mapping missing or unexpected\"}"
+    },
+    {
+      "case": "failing_test",
+      "returncode": 1,
+      "output": "{\"result\": \"failed\", \"evidence\": \"/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/2bab1c1f43d842eb9cca042a7ac51efb/report.json\", \"failure\": \"API tests failed (exit 1)\"}"
+    },
+    {
+      "case": "invalid_database",
+      "returncode": 1,
+      "output": "{\"result\": \"failed\", \"evidence\": \"/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/744f9e194df54d669d4022b8cd2cc3f4/report.json\", \"failure\": \"refusing to use or clean a non-run test database\"}"
+    }
+  ]
+}

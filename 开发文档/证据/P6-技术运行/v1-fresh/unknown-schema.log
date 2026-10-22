@@ -1,0 +1,15 @@
+INFO:     Started server process [93771]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/p6-42cab0b5a9bc46ca8e2f33f9c0e4b565/clean-venv/lib/python3.11/site-packages/starlette/routing.py", line 654, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "/opt/homebrew/Caskroom/miniconda/base/envs/contemporary_db/lib/python3.11/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/vr/clvbnx9j1758qb4j53hcv48r0000gn/T/survey-v1-d_9y__gm/app/main.py", line 113, in lifespan
+    initialize(db)
+  File "/private/var/folders/vr/clvbnx9j1758qb4j53hcv48r0000gn/T/survey-v1-d_9y__gm/app/db.py", line 67, in initialize
+    raise RuntimeError('unsupported schema_version')
+RuntimeError: unsupported schema_version
+
+ERROR:    Application startup failed. Exiting.

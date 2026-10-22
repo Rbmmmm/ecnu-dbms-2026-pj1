@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-16T20:53:42.241391+08:00",
+  "kind": "P4收尾静态核对，不是再次运行101业务案例",
+  "formal_run_id": "ad658f9034504c0394278afd92be93b6",
+  "formal_code": "0ce7bc1e1523346ac12058a2ab517bd31056529f",
+  "checks": {
+    "formal_report_byte_identical": true,
+    "formal_report_sha256": "e70dac9ecbf00809ed098c5faa67e05ea321c9d409ac5ba06afb922642a20cae",
+    "junit_cases": 101,
+    "junit_failure_error_skipped": 0,
+    "requirements": 24,
+    "groups": 13,
+    "old_materials_and_P3_tests_unchanged": true,
+    "accepted_business_code_tests_dependencies_unchanged": true,
+    "old_stage_reports_unchanged": true,
+    "manual_fingerprint_current": true,
+    "same_W010_prompt": true,
+    "W010_prompt_sha256": "2307da885f73f202780968851789e6469cb4a9c3e1733583ba0ecb6b01e4302d",
+    "current_health": {
+      "status": "ready",
+      "stage": "P4",
+      "work_package": "W-009",
+      "schema_version": 1
+    },
+    "git_diff_check": "维护源码/文档及其他证据通过；两份原始失败JUnit的pytest提示空行自带尾部空格，逐字节确认后保留",
+    "raw_failed_junit_byte_identical": true
+  },
+  "preflight_attempts": [
+    {
+      "result": "rejected",
+      "reason": "临时静态调用的run_id含下划线，guard在任何数据库连接前拒绝；非正式业务验收"
+    },
+    {
+      "result": "passed",
+      "reason": "改为uuid十六进制run_id，原题/链接/敏感配置/固定P4映射/实际审查指纹检查通过；未连接或创建测试库"
+    }
+  ],
+  "changed_formal_version_files": [
+    "README.md",
+    "tests/manual-review.json"
+  ],
+  "not_executed": [
+    "P5/P6",
+    "T14/T15",
+    "最终提交文档",
+    "用户文字与贡献终审",
+    "干净安装复现",
+    "最终v1封存"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "run_id": "46e5d202929c481994503bc550bbb3ea",
+  "date": "2026-10-16T13:21:41.569069+00:00",
+  "result": "passed",
+  "mode": "create",
+  "synthetic_data_only": true,
+  "health": {
+    "status": "ready",
+    "stage": "P4",
+    "work_package": "W-009",
+    "schema_version": 1
+  },
+  "process_restart": "passed",
+  "restore_comparison": "not_applicable",
+  "counts": {
+    "survey_users": 4,
+    "survey_surveys": 3,
+    "survey_responses": 8
+  },
+  "data_sha256": "eeb5999dd13c76a7602a98d80fe8e937051edaebe3d9e37322c41364b999315b",
+  "schema_sha256": "a45aa46538f63893de615ac8dc990c362c303d890fff620a014c48529f7c97a6",
+  "api_sha256": "ad2b50949e2eb7e0e1eca1c10713d98f0c21c18476c2eb09a28447837a5470f9",
+  "unknown_schema": "initialize and actual application startup rejected",
+  "python": "3.11.17 (main, Oct  6 2026, 23:54:59) [Clang 21.1.8 ]",
+  "mongodb": "8.0.32",
+  "origin": "http://127.0.0.1:57199",
+  "independent_expected": {
+    "f01": [
+      5,
+      3
+    ],
+    "single_options": [
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "multiple": [
+      2,
+      2,
+      0
+    ],
+    "average": "10.00",
+    "all_responses": 8,
+    "branches": [
+      2,
+      3
+    ]
+  },
+  "test_database_cleaned": true
+}

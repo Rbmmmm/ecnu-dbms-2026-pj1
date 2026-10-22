@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.573" timestamp="2026-10-16T20:36:46.737468+08:00" hostname="MacBook-Pro-112.local"><testcase classname="tests.test_p4" name="test_T06_P4_display_rounds_original_values_once[values0-1.00]" time="0.244"><failure message="AssertionError: assert '1.01' == '1.00'&#10;  &#10;  - 1.00&#10;  ?    ^&#10;  + 1.01&#10;  ?    ^">tests/test_p4.py:144: in test_T06_P4_display_rounds_original_values_once
+    assert summary(client, survey)['questions'][0]['average_display'] == expected
+E   AssertionError: assert '1.01' == '1.00'
+E     
+E     - 1.00
+E     ?    ^
+E     + 1.01
+E     ?    ^</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_display_rounds_original_values_once[values1-1.00]" time="0.090"><failure message="AssertionError: assert '1.01' == '1.00'&#10;  &#10;  - 1.00&#10;  ?    ^&#10;  + 1.01&#10;  ?    ^">tests/test_p4.py:144: in test_T06_P4_display_rounds_original_values_once
+    assert summary(client, survey)['questions'][0]['average_display'] == expected
+E   AssertionError: assert '1.01' == '1.00'
+E     
+E     - 1.00
+E     ?    ^
+E     + 1.01
+E     ?    ^</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_display_rounds_original_values_once[values2--1.00]" time="0.086"><failure message="AssertionError: assert '-1.01' == '-1.00'&#10;  &#10;  - -1.00&#10;  ?     ^&#10;  + -1.01&#10;  ?     ^">tests/test_p4.py:144: in test_T06_P4_display_rounds_original_values_once
+    assert summary(client, survey)['questions'][0]['average_display'] == expected
+E   AssertionError: assert '-1.01' == '-1.00'
+E     
+E     - -1.00
+E     ?     ^
+E     + -1.01
+E     ?     ^</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_display_rounds_original_values_once[values3--1.00]" time="0.109"><failure message="AssertionError: assert '-1.01' == '-1.00'&#10;  &#10;  - -1.00&#10;  ?     ^&#10;  + -1.01&#10;  ?     ^">tests/test_p4.py:144: in test_T06_P4_display_rounds_original_values_once
+    assert summary(client, survey)['questions'][0]['average_display'] == expected
+E   AssertionError: assert '-1.01' == '-1.00'
+E     
+E     - -1.00
+E     ?     ^
+E     + -1.01
+E     ?     ^</failure></testcase></testsuite></testsuites>

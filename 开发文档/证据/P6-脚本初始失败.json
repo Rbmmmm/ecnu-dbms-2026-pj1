@@ -1,0 +1,38 @@
+[
+  {
+    "source": "artifacts/w010/v1-first/result.json",
+    "raw_result": {
+      "run_id": "51483ef4957c49b48c724d45ce887747",
+      "date": "2026-10-16T13:20:52.349271+00:00",
+      "result": "failed",
+      "mode": "create",
+      "synthetic_data_only": true,
+      "health": {
+        "status": "ready",
+        "stage": "P4",
+        "work_package": "W-009",
+        "schema_version": 1
+      },
+      "failure": "KeyError: 'question_id'",
+      "test_database_cleaned": true
+    }
+  },
+  {
+    "source": "artifacts/w010/v1-second/result.json",
+    "raw_result": {
+      "run_id": "6196e1187894424aaf558376f2c9d5e7",
+      "date": "2026-10-16T13:21:13.705630+00:00",
+      "result": "failed",
+      "mode": "create",
+      "synthetic_data_only": true,
+      "health": {
+        "status": "ready",
+        "stage": "P4",
+        "work_package": "W-009",
+        "schema_version": 1
+      },
+      "failure": "AssertionError: ",
+      "test_database_cleaned": true
+    }
+  }
+]

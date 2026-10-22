@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-16",
+  "baseline": "d27c065",
+  "initial_api": {
+    "passed": 5,
+    "failed": 11,
+    "evidence": "P4-首轮API失败.xml",
+    "findings": [
+      "六种有限消去排列中四种错误显示0.00，应0.33",
+      "2**100的draft/deadline/close/list/text_contents/number_contents为500；publish为409；应统一输入422"
+    ]
+  },
+  "double_rounding": {
+    "failed": 4,
+    "evidence": "P4-二次舍入失败.xml",
+    "findings": "精确均值±1.0049999999999999999999999999999995应显示±1.00，原实现±1.01"
+  },
+  "initial_browser": {
+    "unicode_password": {
+      "expected_codepoints": 70,
+      "actual_codepoints": 64,
+      "result": "failed"
+    },
+    "anonymous_backtrack": {
+      "expected": true,
+      "actual": false,
+      "result": "failed"
+    },
+    "list_pagination": "passed"
+  },
+  "full_entry_first": {
+    "run_id": "6ef3da4531224bd1956138c24e5dd4aa",
+    "result": "failed",
+    "reason": "只有app/.DS_Store与scripts/.DS_Store被macOS自动修改；全部源码及审查指纹一致",
+    "fix": "version和code_fingerprint统一排除已忽略.DS_Store，保留全部业务及文档检查"
+  },
+  "final": {
+    "run_id": "ad658f9034504c0394278afd92be93b6",
+    "result": "passed",
+    "code": "0ce7bc1e1523346ac12058a2ab517bd31056529f",
+    "count": 101,
+    "failed": 0,
+    "skipped": 0
+  },
+  "old_tests": "P2/W007/W008测试及网页与d6a2062无源码diff"
+}

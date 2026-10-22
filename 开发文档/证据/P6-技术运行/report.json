@@ -1,0 +1,757 @@
+{
+  "stage": "P6",
+  "run_id": "42cab0b5a9bc46ca8e2f33f9c0e4b565",
+  "date": "2026-10-16T13:35:42.463680+00:00",
+  "result": "pending_user_review_or_publication",
+  "technical_result": "passed",
+  "version": {
+    "head": "fb413f2557d2919d70b6839cdfd528387a31bed3",
+    "branch": "main",
+    "dirty": false,
+    "status": "",
+    "file_sha256": {
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/config.py": "245f35f7bdf705f427643afb88eafd796aa4aa4b9d5015166d9596349306737f",
+      "app/db.py": "fa416be260ee6912df27e09a8f970dea8f10e6c5e6332f2fc4448047a54603d6",
+      "app/decimal_values.py": "2074bff8a580cb96a9ab6bfb2e924065baaad15961b598225cce202e8694f19b",
+      "app/domain.py": "12106aacf72fdad2f3e9c749005b5c79a182060ca9a6c624cdad2d0ccdfcc291",
+      "app/main.py": "299e59993712ec748d27a0d7252350163f0ff3a93b3a33fa82fbf5ce26e90b78",
+      "app/schemas.py": "8c362317293471505a5a714b513df8e790596a0513b18cf4ac3ba881ad7c3b08",
+      "app/static/app.js": "99564adece53ff684dbdcf684c40dcae2befd3b15222d1dcfa96e04e526912bb",
+      "app/static/style.css": "15321855245b1e799575ae572a6f061b06de08ba19ad519417f814a4e6baa4b2",
+      "app/statistics.py": "e21e4545bb0d4c7ac57ee6b8f30c67e92baa8fca556f5068df37c8e7ee66d61c",
+      "app/templates/page.html": "899cd6f9530df25bd2eb2e8a1ebe432a1563dc0dac8a85a91796a8a22ab804f6",
+      "app/time_values.py": "d168c5fd49746afc9b4d9b3bf692ff75018c96a0366e5dcee4c969e45c181f14",
+      "scripts/init_db.py": "7dfecb9a30208852db07419f9cd2bf41d67c2eb41fe9214b08c03c7bd740d561",
+      "scripts/p4_audit.py": "7077135e0fc9f9f2a2332db28fad502f5f59976e4c428bcb80fd29531465e322",
+      "scripts/p6_acceptance.py": "dd69099bc36968df405a5d0bc82498a94511c3d1b0817621d9f5bd5ec3d48741",
+      "scripts/run.py": "cfb1fb3f0f3f0ab9f2696947578f6672aa5cd92b762bc16362a716754e3018b6",
+      "scripts/test_server.py": "d7e5068cb48c18396fca3c9e1ae05745cbeec6c85329d0670cab838b12f319ee",
+      "scripts/v1_baseline.py": "c2c2ab04864a86cfc986f22fd5fd46ee9c63f90906d1356f71a41d7d5db75d59",
+      "scripts/verify.py": "fae065c901bd45193004b59a524bb6bc977a614d7bb996394f159c14e17737be",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/browser.cjs": "ef34c3ca52ff7c472f6740c2a519e7d398f20dca61dd6a8aa6dd478a358da71b",
+      "tests/browser_p4.cjs": "0fba93bd9545a9bcbb5de8871f86786955a79b821a999fe2d196c4316084b1d4",
+      "tests/browser_w007.cjs": "eb00ad2b4d22fda3248f51a114c8992a489c148d632c614ae736936a5d211390",
+      "tests/browser_w008.cjs": "ac5f258423d2dd3c9d3d6f11f7b10e0729ea4b6e45dd3d94efb0e48774862799",
+      "tests/conftest.py": "80b6abe042da65e6bb4c0d628064b0b16ed96d3681bcfab6d9dc5052892bfe75",
+      "tests/delivery-qa.json": "178aa166cd07f3d1e3a6a7371198f8b62069ff7898cfbbcf961aa64b138f5f8c",
+      "tests/delivery-review.json": "18ba6139d3ecb5d8a431e7efc1f7570e553456a7bd4d66bf53344b8835da7d75",
+      "tests/fixtures-f01.json": "1fee8bb2f33b49fe84fb8dc14efe0a7112bb940bed209bff1819ae7e837f9ab3",
+      "tests/fixtures_f01.py": "6a7995782201eda252b2b35e13147ed9ba65ab18802c2266953b9cdc331f7172",
+      "tests/fixtures_f02.py": "48f0bca2a811a93f09edccdc5822904eec01d36d76d5e44fd083f485b5aba3b7",
+      "tests/manual-review.json": "0eeff74cfe3e6358d3448b5f4a3caefe45c44730e6e81306e5e0403a69d24f33",
+      "tests/original-materials.json": "4112ee0e86901036f41629930f8d81bf5b6f51783f77d366b33a795eb366a680",
+      "tests/requirements-map-p3.json": "35a968b7600e4fecefa8ef16bca848f7015ee3d4dab5e14e0761a66323376639",
+      "tests/requirements-map-p4.json": "11b0916f7934ba274d7e2c8fcdff12150e10f014ed5a8b847cc6d652890a8b63",
+      "tests/requirements-map-p6.json": "875911b252bcd306e9e08f6c795fa648f1a07d9dcc840f8bdacf32cfbdd8a2c5",
+      "tests/requirements-map-w007.json": "51fa7367b5da3c396687a165fe3256725306d5a428d2f8c0617fb5009ad646ae",
+      "tests/requirements-map.json": "01e5b2bfa012679d59e83799712e12540305748f4254dd098ec5a6f7649c7dae",
+      "tests/test_p2.py": "6c64ddabc871ad434cdd83942f18f93129a802a9de7dc5161b0fe8f18e71198e",
+      "tests/test_p4.py": "c3f24f25752c250b97b8a15582d00c3fea7e698c7d468788003c3492572c23f5",
+      "tests/test_w007.py": "e0813fd67271ef3d4dc70e3f5b4c2187182dddace1f132ac8b54b1b5b4c6898e",
+      "tests/test_w008.py": "ff9099b7119a0247c50f2baa8573433016a88aafdd709acc9ce61ddc24958002",
+      "requirements.lock.txt": "d3d01114c041e5a8a95cb8d907df118e4a808461ced73b2713a09d0321c07177",
+      "README.md": "a2839c9a7f820c0a3d4b1fa041157bdb8fb1c42c8af3f722684b20060af201b3"
+    }
+  },
+  "checks": {
+    "documents": {
+      "result": "passed",
+      "pages": 6,
+      "sha256": "12d938fb0088cbbb4a193fcc0ba6a5c4e38fbe73e7a9a37fe7fd0a441a76c891",
+      "visual_review": {
+        "date": "2026-10-16",
+        "reviewer": "Codex主代理；同模型协作者只读语义审查，不是用户终审",
+        "result": "reviewed",
+        "pdf_sha256": "12d938fb0088cbbb4a193fcc0ba6a5c4e38fbe73e7a9a37fe7fd0a441a76c891",
+        "source_sha256": "7965e6b2ca571224d23a779377c4ad26ba89c09bac2d0502864b73afc0d3ca93",
+        "reviewed_pages": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "observations": [
+          "逐页查看最新1300px渲染的6页，中文及英文/等宽标识可读，表格跨页重复表头，未见文字裁切或重叠，页码1—6完整",
+          "首页第一项明确当前仓库链接未提供，审核稿状态可见；用户提供URL后必须重渲染复查",
+          "PDF正文逐项核对六类测试具体输入、预期与真实结果，均值/人数/匿名/分支和贡献范围与源码、JUnit及BSON证据一致",
+          "未发现助手自述、对话残留或虚构人工编码；真实AI提示词和贡献披露属作业所需"
+        ],
+        "semantic_steps": [
+          "逐读七份文稿，比较原Word/需求Markdown、B001—016与实际app/schema/API",
+          "API清单核对17业务操作和health，关键逻辑核对pending、归属、幂等、受理边界及统计单位",
+          "比对P4真实报告与本轮101案例、v1实测结果，历史故障与新脚本构造错误分开",
+          "个人贡献只归属用户的选择/约束/确认；编码、修复、执行与文稿归于AI，未声称用户审核"
+        ],
+        "documents_sha256": {
+          "提交文档/项目完成报告.md": "7965e6b2ca571224d23a779377c4ad26ba89c09bac2d0502864b73afc0d3ca93",
+          "提交文档/系统与数据库设计.md": "49d4a846bbe4e4c12ac8bd4f4ffe03e18cfe3349dc772719ca81d2e68b3ef0cd",
+          "提交文档/运行与API说明.md": "9795adbb725ebdd535f8f5d40e79dd3bd3d751c39a371b16b93288110e9967d2",
+          "提交文档/关键逻辑说明.md": "a66ebcacab3d5a7fe57f18e6de8d65e7e035b61a0f8cf1ad3084b809c701900f",
+          "提交文档/测试用例与结果.md": "7453179c10e74f3d1b696e4fe65b2aaf02481b6f7185a591eb4a797edd7a938d",
+          "提交文档/AI使用日志.md": "13eb206931498b1ff655015d16f029cd38c42949ca9fc5c5e407c0b7e1835a3e",
+          "提交文档/提交清单.md": "16922d09c4e7e29eb1e6f9efefdee93f203f2a9d14197d508a02e38913afd2b0"
+        }
+      },
+      "first_page_text": "GitHub 仓库链接：尚未提供，当前仅供审核。\n\n基于 MongoDB 的问卷系统：第一阶段项目完成报告\n作者：任北鸣。个人作业；文字与贡献归属待审核。提交截止时间为 2026 年 10 月 23 日 00:00（北京时间，\n即 10 月 22 日夜间结束）。GitHub 提交可运行的前后端、测试及 README；水杉提交本报告 PDF，文件名为\n2026_ECNU_PJ1_1_ 任北鸣.pdf。当前文稿用于审阅，仓库链接和最终交付核对尚未完成，不能直接视为最终提交版本。\n报告日期：2026 年 10 月 16 日。业务功能已完成 P4 验收；本次文档、干净配置复现及第一阶段封存属于 W-010。用\n户文字及贡献审核尚未完成。\n\n1. 项目目标与实现范围\n本项目实现一个简化的在线问卷系统。注册用户可以创建问卷、配置题目和跳转规则、发布链接、设置截止时间及关\n闭问卷；填写者登录后按路径回答、确认并提交；创建者查看整卷和单题统计。项目使用 MongoDB 保存全部持久业\n务数据，未使用关系数据库或现成问卷系统框架。\n原题的题型包括单选、多选和填空，其中填空分为文本与数字。因此实现中采用 single、multiple、text、number 四\n种题型标识。界面以完成创建、填写和统计为目的，没有增加复杂主题或拖拽编辑器。\n对原题未明确的行为，先提出解释并确认后实施：填写者必须登录，匿名表示对问卷创建者隐藏身份，服务端仍保留\n账号关联用于防重和人数统计；问卷默认每账号一次，创建者可开启重复填写；发布后冻结题目、规则及匿名和重复\n设置，仅可修改截止时间或关闭；一次有效提交保存一份完整答卷，不保存服务器端答题草稿。上述是本项目采用的\n业务约定，并非助教原文逐项规定。\n第一阶段不包含找回密码、管理员后台、公开统计、删除问卷或答卷、Excel 导出、附件题、提交后修改及撤回。第二\n阶段将在现有结构上扩展，不另建替代系统。\n\n2. 系统结构与使用流程\n后端为 Python 3.11、FastAPI 和同步 PyMongo；Jinja2 提供页面骨架，HTML/CSS 与原生 JavaScript 完成交互，\n页面和 API 同源。当前实测使用 MongoDB Community 8.0.32；依赖版本由 requirements.lock.txt 固定，其中\nFastAPI 为 0.143.1，PyMongo 为 4.18.2，Jinja2 为 3.1.6。运行及配置细节见仓库 README 和《运行与 API 说\n明》\n。\n主要模块按业务职责组织：app/main.py 处理路由、身份与归属、状态变更和提交；schemas.py 校验请求结构；domain.py\n实现发布检查、答案校验和路径重放；db.py 定义数据库 validator、索引及启动检查；statistics.py 负责统计和内\n容分页；decimal_values.py、time_values.py 统一数值与时间边界。页面代码位于 app/templates/ 和 app/static/。\n没有为小规模项目建立空的服务层或仓储层。\n完整操作流程如下：\n\n1. 创建者注册、登录，在 “我的问卷” 中创建草稿，填写标题、说明和参与设置。\n2. 添加题目，配置选项、必答、限制及跳转规则，保存草稿。未完成的配置可继续编辑，发布时必须通过完整检查。\n3. 发布后获得 /survey/{id} 链接。填写者打开链接，登录后逐题填写，可返回已访问题修改。\n4. 题目完成或规则指向结束时进入确认页；确认页不保存数据，只有点击提交并通过后端检查才写入答卷。\n5. 创建者查看统计和填空内容，可设置未来截止时间、清除截止或关闭问卷。到期但未关闭的问卷可延长截止，手\n动关闭的问卷不重开。\n认证使用会话 cookie，MongoDB 只保存令牌哈希和到期时间；密码使用 Argon2 哈希。所有管理和统计查询都校验\nowner_id，他人的资源返回 404。匿名保护通过 API 字段白名单落实，而不只是隐藏页面列。\n\n3. MongoDB 设计\n设计参照课程教材第 3.1 节的需求、概念、逻辑与物理设计流程，以及第 3.2 节的嵌套和引用比较。关键依据是读写\n边界：填写通常一次读取整份问卷；提交一次形成完整答卷；答卷数量随使用增长。\n实际集合\nsurvey_users\n\n主要字段\n\n嵌套与引用\n\nusername、password_hash、\n\n用户独立存储，其他对象通过用户\nID 引用\n题目数组嵌入问卷，每题嵌入选项、\n校验配置和规则\n\ncreated_at、schema_version\nsurvey_surveys\n\nowner_id、标题和说明、匿名/重复\n设置、状态、截止、revision、\ncontent_version、questions\n\n1\n\n\f"
+    },
+    "full_p4": {
+      "result": "passed",
+      "run_id": "916f9bce95314f48ab703c71f1577902",
+      "cases": 101
+    },
+    "counterexamples": {
+      "missing_file": {
+        "rejected": true,
+        "reason": "package file list differs from fixed manifest"
+      },
+      "tampered_file": {
+        "rejected": true,
+        "reason": "package content hash mismatch: requirements.lock.txt"
+      },
+      "tampered_baseline": {
+        "rejected": true,
+        "reason": "package content hash mismatch: 提交文档/附件/v1-baseline.json"
+      },
+      "missing_review": {
+        "rejected": true,
+        "reason": [
+          "user wording and contribution review not recorded",
+          "user review does not bind the current submission files",
+          "explicit user review evidence missing",
+          "confirmed GitHub repository URL missing"
+        ]
+      },
+      "ai_review": {
+        "rejected": true,
+        "reason": [
+          "user wording and contribution review not recorded",
+          "user review does not bind the current submission files",
+          "explicit user review evidence missing",
+          "confirmed GitHub repository URL missing"
+        ]
+      },
+      "stale_review": {
+        "rejected": true,
+        "reason": [
+          "user review does not bind the current submission files"
+        ]
+      }
+    },
+    "clean_install": {
+      "result": "passed",
+      "locked_packages": 31,
+      "system_site_packages": false
+    },
+    "clean_api_regression": {
+      "result": "passed",
+      "cases": 101
+    },
+    "v1_fresh": {
+      "run_id": "eb2067855aad4a64a1b1f395d2b7ef80",
+      "date": "2026-10-16T13:36:53.011143+00:00",
+      "result": "passed",
+      "mode": "create",
+      "synthetic_data_only": true,
+      "health": {
+        "status": "ready",
+        "stage": "P4",
+        "work_package": "W-009",
+        "schema_version": 1
+      },
+      "process_restart": "passed",
+      "restore_comparison": "not_applicable",
+      "counts": {
+        "survey_users": 4,
+        "survey_surveys": 3,
+        "survey_responses": 8
+      },
+      "data_sha256": "e47e828f88a2617cb71d3facf60c5e92b0b6140691144fbe80930107b8002bad",
+      "schema_sha256": "a45aa46538f63893de615ac8dc990c362c303d890fff620a014c48529f7c97a6",
+      "api_sha256": "ad2b50949e2eb7e0e1eca1c10713d98f0c21c18476c2eb09a28447837a5470f9",
+      "unknown_schema": "initialize and actual application startup rejected",
+      "python": "3.11.17 (main, Oct  6 2026, 23:54:59) [Clang 21.1.8 ]",
+      "mongodb": "8.0.32",
+      "origin": "http://127.0.0.1:59682",
+      "independent_expected": {
+        "f01": [
+          5,
+          3
+        ],
+        "single_options": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "multiple": [
+          2,
+          2,
+          0
+        ],
+        "average": "10.00",
+        "all_responses": 8,
+        "branches": [
+          2,
+          3
+        ]
+      },
+      "test_database_cleaned": true
+    },
+    "v1_restored": {
+      "run_id": "7ca90fa73f394a13a3dc6078396d27bb",
+      "date": "2026-10-16T13:36:57.154046+00:00",
+      "result": "passed",
+      "mode": "restore",
+      "synthetic_data_only": true,
+      "health": {
+        "status": "ready",
+        "stage": "P4",
+        "work_package": "W-009",
+        "schema_version": 1
+      },
+      "process_restart": "passed",
+      "restore_comparison": "passed",
+      "counts": {
+        "survey_users": 4,
+        "survey_surveys": 3,
+        "survey_responses": 8
+      },
+      "data_sha256": "eeb5999dd13c76a7602a98d80fe8e937051edaebe3d9e37322c41364b999315b",
+      "schema_sha256": "a45aa46538f63893de615ac8dc990c362c303d890fff620a014c48529f7c97a6",
+      "api_sha256": "ad2b50949e2eb7e0e1eca1c10713d98f0c21c18476c2eb09a28447837a5470f9",
+      "unknown_schema": "initialize and actual application startup rejected",
+      "python": "3.11.17 (main, Oct  6 2026, 23:54:59) [Clang 21.1.8 ]",
+      "mongodb": "8.0.32",
+      "origin": "http://127.0.0.1:59722",
+      "independent_expected": {
+        "f01": [
+          5,
+          3
+        ],
+        "single_options": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "multiple": [
+          2,
+          2,
+          0
+        ],
+        "average": "10.00",
+        "all_responses": 8,
+        "branches": [
+          2,
+          3
+        ]
+      },
+      "test_database_cleaned": true
+    },
+    "user_review": {
+      "result": "pending",
+      "reasons": [
+        "user wording and contribution review not recorded",
+        "user review does not bind the current submission files",
+        "explicit user review evidence missing",
+        "confirmed GitHub repository URL missing"
+      ]
+    },
+    "github_delivery": {
+      "result": "pending",
+      "reasons": [
+        "confirmed GitHub URL is missing"
+      ]
+    },
+    "v1_restore": {
+      "result": "passed",
+      "create": "v1-fresh/result.json",
+      "restore": "v1-restored/result.json"
+    }
+  },
+  "command": [
+    "scripts/verify.py",
+    "--stage",
+    "P6",
+    "--node",
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "--playwright-module",
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+    "--chromium",
+    "/Users/renbeiming/Library/Caches/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-mac-arm64/chrome-headless-shell"
+  ],
+  "manifest": {
+    "format_version": 1,
+    "status": "review_candidate",
+    "source_git": {
+      "head": "fb413f2557d2919d70b6839cdfd528387a31bed3",
+      "branch": "main",
+      "dirty": false,
+      "status": "",
+      "file_sha256": {
+        "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app/config.py": "245f35f7bdf705f427643afb88eafd796aa4aa4b9d5015166d9596349306737f",
+        "app/db.py": "fa416be260ee6912df27e09a8f970dea8f10e6c5e6332f2fc4448047a54603d6",
+        "app/decimal_values.py": "2074bff8a580cb96a9ab6bfb2e924065baaad15961b598225cce202e8694f19b",
+        "app/domain.py": "12106aacf72fdad2f3e9c749005b5c79a182060ca9a6c624cdad2d0ccdfcc291",
+        "app/main.py": "299e59993712ec748d27a0d7252350163f0ff3a93b3a33fa82fbf5ce26e90b78",
+        "app/schemas.py": "8c362317293471505a5a714b513df8e790596a0513b18cf4ac3ba881ad7c3b08",
+        "app/static/app.js": "99564adece53ff684dbdcf684c40dcae2befd3b15222d1dcfa96e04e526912bb",
+        "app/static/style.css": "15321855245b1e799575ae572a6f061b06de08ba19ad519417f814a4e6baa4b2",
+        "app/statistics.py": "e21e4545bb0d4c7ac57ee6b8f30c67e92baa8fca556f5068df37c8e7ee66d61c",
+        "app/templates/page.html": "899cd6f9530df25bd2eb2e8a1ebe432a1563dc0dac8a85a91796a8a22ab804f6",
+        "app/time_values.py": "d168c5fd49746afc9b4d9b3bf692ff75018c96a0366e5dcee4c969e45c181f14",
+        "scripts/init_db.py": "7dfecb9a30208852db07419f9cd2bf41d67c2eb41fe9214b08c03c7bd740d561",
+        "scripts/p4_audit.py": "7077135e0fc9f9f2a2332db28fad502f5f59976e4c428bcb80fd29531465e322",
+        "scripts/p6_acceptance.py": "dd69099bc36968df405a5d0bc82498a94511c3d1b0817621d9f5bd5ec3d48741",
+        "scripts/run.py": "cfb1fb3f0f3f0ab9f2696947578f6672aa5cd92b762bc16362a716754e3018b6",
+        "scripts/test_server.py": "d7e5068cb48c18396fca3c9e1ae05745cbeec6c85329d0670cab838b12f319ee",
+        "scripts/v1_baseline.py": "c2c2ab04864a86cfc986f22fd5fd46ee9c63f90906d1356f71a41d7d5db75d59",
+        "scripts/verify.py": "fae065c901bd45193004b59a524bb6bc977a614d7bb996394f159c14e17737be",
+        "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tests/browser.cjs": "ef34c3ca52ff7c472f6740c2a519e7d398f20dca61dd6a8aa6dd478a358da71b",
+        "tests/browser_p4.cjs": "0fba93bd9545a9bcbb5de8871f86786955a79b821a999fe2d196c4316084b1d4",
+        "tests/browser_w007.cjs": "eb00ad2b4d22fda3248f51a114c8992a489c148d632c614ae736936a5d211390",
+        "tests/browser_w008.cjs": "ac5f258423d2dd3c9d3d6f11f7b10e0729ea4b6e45dd3d94efb0e48774862799",
+        "tests/conftest.py": "80b6abe042da65e6bb4c0d628064b0b16ed96d3681bcfab6d9dc5052892bfe75",
+        "tests/delivery-qa.json": "178aa166cd07f3d1e3a6a7371198f8b62069ff7898cfbbcf961aa64b138f5f8c",
+        "tests/delivery-review.json": "18ba6139d3ecb5d8a431e7efc1f7570e553456a7bd4d66bf53344b8835da7d75",
+        "tests/fixtures-f01.json": "1fee8bb2f33b49fe84fb8dc14efe0a7112bb940bed209bff1819ae7e837f9ab3",
+        "tests/fixtures_f01.py": "6a7995782201eda252b2b35e13147ed9ba65ab18802c2266953b9cdc331f7172",
+        "tests/fixtures_f02.py": "48f0bca2a811a93f09edccdc5822904eec01d36d76d5e44fd083f485b5aba3b7",
+        "tests/manual-review.json": "0eeff74cfe3e6358d3448b5f4a3caefe45c44730e6e81306e5e0403a69d24f33",
+        "tests/original-materials.json": "4112ee0e86901036f41629930f8d81bf5b6f51783f77d366b33a795eb366a680",
+        "tests/requirements-map-p3.json": "35a968b7600e4fecefa8ef16bca848f7015ee3d4dab5e14e0761a66323376639",
+        "tests/requirements-map-p4.json": "11b0916f7934ba274d7e2c8fcdff12150e10f014ed5a8b847cc6d652890a8b63",
+        "tests/requirements-map-p6.json": "875911b252bcd306e9e08f6c795fa648f1a07d9dcc840f8bdacf32cfbdd8a2c5",
+        "tests/requirements-map-w007.json": "51fa7367b5da3c396687a165fe3256725306d5a428d2f8c0617fb5009ad646ae",
+        "tests/requirements-map.json": "01e5b2bfa012679d59e83799712e12540305748f4254dd098ec5a6f7649c7dae",
+        "tests/test_p2.py": "6c64ddabc871ad434cdd83942f18f93129a802a9de7dc5161b0fe8f18e71198e",
+        "tests/test_p4.py": "c3f24f25752c250b97b8a15582d00c3fea7e698c7d468788003c3492572c23f5",
+        "tests/test_w007.py": "e0813fd67271ef3d4dc70e3f5b4c2187182dddace1f132ac8b54b1b5b4c6898e",
+        "tests/test_w008.py": "ff9099b7119a0247c50f2baa8573433016a88aafdd709acc9ce61ddc24958002",
+        "requirements.lock.txt": "d3d01114c041e5a8a95cb8d907df118e4a808461ced73b2713a09d0321c07177",
+        "README.md": "a2839c9a7f820c0a3d4b1fa041157bdb8fb1c42c8af3f722684b20060af201b3"
+      }
+    },
+    "schema_version": 1,
+    "content_version": 1,
+    "files_sha256": {
+      ".env.example": "8f8c59c9c055a49a1c914ae2350db387d506ae930d8baa802c264d072c35b2c0",
+      "README.md": "a2839c9a7f820c0a3d4b1fa041157bdb8fb1c42c8af3f722684b20060af201b3",
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/config.py": "245f35f7bdf705f427643afb88eafd796aa4aa4b9d5015166d9596349306737f",
+      "app/db.py": "fa416be260ee6912df27e09a8f970dea8f10e6c5e6332f2fc4448047a54603d6",
+      "app/decimal_values.py": "2074bff8a580cb96a9ab6bfb2e924065baaad15961b598225cce202e8694f19b",
+      "app/domain.py": "12106aacf72fdad2f3e9c749005b5c79a182060ca9a6c624cdad2d0ccdfcc291",
+      "app/main.py": "299e59993712ec748d27a0d7252350163f0ff3a93b3a33fa82fbf5ce26e90b78",
+      "app/schemas.py": "8c362317293471505a5a714b513df8e790596a0513b18cf4ac3ba881ad7c3b08",
+      "app/static/app.js": "99564adece53ff684dbdcf684c40dcae2befd3b15222d1dcfa96e04e526912bb",
+      "app/static/style.css": "15321855245b1e799575ae572a6f061b06de08ba19ad519417f814a4e6baa4b2",
+      "app/statistics.py": "e21e4545bb0d4c7ac57ee6b8f30c67e92baa8fca556f5068df37c8e7ee66d61c",
+      "app/templates/page.html": "899cd6f9530df25bd2eb2e8a1ebe432a1563dc0dac8a85a91796a8a22ab804f6",
+      "app/time_values.py": "d168c5fd49746afc9b4d9b3bf692ff75018c96a0366e5dcee4c969e45c181f14",
+      "requirements.lock.txt": "d3d01114c041e5a8a95cb8d907df118e4a808461ced73b2713a09d0321c07177",
+      "scripts/init_db.py": "7dfecb9a30208852db07419f9cd2bf41d67c2eb41fe9214b08c03c7bd740d561",
+      "scripts/run.py": "cfb1fb3f0f3f0ab9f2696947578f6672aa5cd92b762bc16362a716754e3018b6",
+      "scripts/test_server.py": "d7e5068cb48c18396fca3c9e1ae05745cbeec6c85329d0670cab838b12f319ee",
+      "scripts/v1_baseline.py": "c2c2ab04864a86cfc986f22fd5fd46ee9c63f90906d1356f71a41d7d5db75d59",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/browser.cjs": "ef34c3ca52ff7c472f6740c2a519e7d398f20dca61dd6a8aa6dd478a358da71b",
+      "tests/browser_p4.cjs": "0fba93bd9545a9bcbb5de8871f86786955a79b821a999fe2d196c4316084b1d4",
+      "tests/browser_w007.cjs": "eb00ad2b4d22fda3248f51a114c8992a489c148d632c614ae736936a5d211390",
+      "tests/browser_w008.cjs": "ac5f258423d2dd3c9d3d6f11f7b10e0729ea4b6e45dd3d94efb0e48774862799",
+      "tests/conftest.py": "80b6abe042da65e6bb4c0d628064b0b16ed96d3681bcfab6d9dc5052892bfe75",
+      "tests/fixtures-f01.json": "1fee8bb2f33b49fe84fb8dc14efe0a7112bb940bed209bff1819ae7e837f9ab3",
+      "tests/fixtures_f01.py": "6a7995782201eda252b2b35e13147ed9ba65ab18802c2266953b9cdc331f7172",
+      "tests/fixtures_f02.py": "48f0bca2a811a93f09edccdc5822904eec01d36d76d5e44fd083f485b5aba3b7",
+      "tests/test_p2.py": "6c64ddabc871ad434cdd83942f18f93129a802a9de7dc5161b0fe8f18e71198e",
+      "tests/test_p4.py": "c3f24f25752c250b97b8a15582d00c3fea7e698c7d468788003c3492572c23f5",
+      "tests/test_w007.py": "e0813fd67271ef3d4dc70e3f5b4c2187182dddace1f132ac8b54b1b5b4c6898e",
+      "tests/test_w008.py": "ff9099b7119a0247c50f2baa8573433016a88aafdd709acc9ce61ddc24958002",
+      "大作业一第一阶段.docx": "88af590b01a4265c31b5da1f2d44f0bb833f4d8fa8c0852478963420b9d685ec",
+      "大作业一第一阶段.md": "86c9ca883073f812a608e8a20f5375fd5424a53f6b46fcffbcbeeac2aadcac4a",
+      "提交文档/2026_ECNU_PJ1_1_任北鸣.pdf": "12d938fb0088cbbb4a193fcc0ba6a5c4e38fbe73e7a9a37fe7fd0a441a76c891",
+      "提交文档/AI使用日志.md": "13eb206931498b1ff655015d16f029cd38c42949ca9fc5c5e407c0b7e1835a3e",
+      "提交文档/关键逻辑说明.md": "a66ebcacab3d5a7fe57f18e6de8d65e7e035b61a0f8cf1ad3084b809c701900f",
+      "提交文档/提交清单.md": "16922d09c4e7e29eb1e6f9efefdee93f203f2a9d14197d508a02e38913afd2b0",
+      "提交文档/测试用例与结果.md": "7453179c10e74f3d1b696e4fe65b2aaf02481b6f7185a591eb4a797edd7a938d",
+      "提交文档/系统与数据库设计.md": "49d4a846bbe4e4c12ac8bd4f4ffe03e18cfe3349dc772719ca81d2e68b3ef0cd",
+      "提交文档/运行与API说明.md": "9795adbb725ebdd535f8f5d40e79dd3bd3d751c39a371b16b93288110e9967d2",
+      "提交文档/附件/P4-真实修复记录.json": "d5158e5e757c7ed9147df37fb5bd0ea60ef793b2844357b21e1b1bdc2f61f77e",
+      "提交文档/附件/W010-P4回归.json": "f28b067b2fe5e5d05b5d8a0dae6f5f95b86ad046be432975c0fa3961b2d63772",
+      "提交文档/附件/W010-P4回归.xml": "05c031e99a95ddc27e51d6072774bc8d4b5ff4e0c157aae41fb567bf28fdd80c",
+      "提交文档/附件/http-observations.json": "6fc5d1f8f40e5bdefc667c9e27488c9389dfbb0ea20b84b940a0ab07d0182f45",
+      "提交文档/附件/openapi-v1.json": "b04678141efe3b5ea835394069810229e658e20e2d237f9e47a363bea95dbf46",
+      "提交文档/附件/schema-v1.json": "a1bc1a1f5073a64a418d4e370c0aa4db72cf44a7ad20fb49ae8b23df08d7125a",
+      "提交文档/附件/v1-baseline.json": "9fb59b34ae9d7d873b5e4aeaf2f8d112d12c2cc6e53a7a36a51208d4edbc06f0",
+      "提交文档/附件/v1-create-result.json": "5a43606b474ed41f790875533521a94377683cb93562d44f53d78f7afcc418b5",
+      "提交文档/附件/v1-restore-result.json": "c75987f3226d4e55bd2336934ddf7ab874cb7e9247d26ea13b6dd3fefbe98ee1",
+      "提交文档/附件/v1-restore-strengthened-result.json": "f2ea9f1b8562840da65c71559efdf4e9f8cb154dbe3fe4adf528b2ad348ac60f",
+      "提交文档/附件/独立环境101案例.xml": "7892d44298e8a87d5c7be42fe5ed8aeecd7e94793ea59395f991dfe0e68f73eb",
+      "提交文档/附件/独立环境依赖检查.txt": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+      "提交文档/项目完成报告.md": "7965e6b2ca571224d23a779377c4ad26ba89c09bac2d0502864b73afc0d3ca93"
+    }
+  },
+  "package": {
+    "path": "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/p6-42cab0b5a9bc46ca8e2f33f9c0e4b565/PJ1-stage1-runtime-reproduction.zip",
+    "sha256": "86c5cbdc7361067e0352260b4fce2e50b6876a659c6727bd2672e2411d147546"
+  },
+  "pending": [
+    "user wording and contribution review not recorded",
+    "user review does not bind the current submission files",
+    "explicit user review evidence missing",
+    "confirmed GitHub repository URL missing",
+    "confirmed GitHub URL is missing"
+  ],
+  "requirements": {
+    "R-001": {
+      "sources": [
+        "app/db.py",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-002": {
+      "sources": [
+        "requirements.lock.txt",
+        "app/main.py",
+        "app/domain.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-003": {
+      "sources": [
+        "app/static/app.js",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-004": {
+      "sources": [
+        "提交文档/系统与数据库设计.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ],
+      "result": "pending"
+    },
+    "R-005": {
+      "sources": [
+        "app/db.py",
+        "app/schemas.py",
+        "app/domain.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-006": {
+      "sources": [
+        "app/main.py",
+        "app/schemas.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-007": {
+      "sources": [
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-008": {
+      "sources": [
+        "app/main.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-009": {
+      "sources": [
+        "app/main.py",
+        "app/time_values.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-010": {
+      "sources": [
+        "app/main.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-011": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-012": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-013": {
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-014": {
+      "sources": [
+        "app/decimal_values.py",
+        "app/schemas.py",
+        "app/domain.py",
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-015": {
+      "sources": [
+        "app/domain.py",
+        "app/schemas.py",
+        "app/static/app.js"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-016": {
+      "sources": [
+        "app/domain.py",
+        "app/static/app.js",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-017": {
+      "sources": [
+        "app/main.py",
+        "app/db.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-018": {
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-019": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-020": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-021": {
+      "sources": [
+        "app/statistics.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-022": {
+      "sources": [
+        "app/statistics.py",
+        "app/main.py"
+      ],
+      "evidence": [
+        "full_p4"
+      ],
+      "result": "passed"
+    },
+    "R-023": {
+      "sources": [
+        "tests/test_p2.py",
+        "tests/test_w007.py",
+        "tests/test_w008.py",
+        "tests/test_p4.py",
+        "scripts/p4_audit.py",
+        "scripts/verify.py",
+        "提交文档/测试用例与结果.md"
+      ],
+      "evidence": [
+        "full_p4",
+        "documents"
+      ],
+      "result": "passed"
+    },
+    "R-024": {
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/schemas.py",
+        "scripts/verify.py"
+      ],
+      "evidence": [
+        "full_p4",
+        "clean_install",
+        "v1_restore",
+        "github_delivery"
+      ],
+      "result": "pending"
+    },
+    "R-025": {
+      "sources": [
+        "提交文档/运行与API说明.md",
+        "提交文档/系统与数据库设计.md",
+        "提交文档/关键逻辑说明.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ],
+      "result": "pending"
+    },
+    "R-026": {
+      "sources": [
+        "提交文档/项目完成报告.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ],
+      "result": "pending"
+    },
+    "R-027": {
+      "sources": [
+        "开发文档/04-AI记录与提交文档.md",
+        "提交文档/AI使用日志.md"
+      ],
+      "evidence": [
+        "full_p4",
+        "documents",
+        "user_review"
+      ],
+      "result": "pending"
+    },
+    "R-028": {
+      "sources": [
+        "提交文档/AI使用日志.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review"
+      ],
+      "result": "pending"
+    },
+    "R-029": {
+      "sources": [
+        "提交文档/提交清单.md",
+        "提交文档/附件/v1-baseline.json",
+        "scripts/v1_baseline.py"
+      ],
+      "evidence": [
+        "documents",
+        "user_review",
+        "v1_restore"
+      ],
+      "result": "pending"
+    },
+    "R-030": {
+      "sources": [
+        "提交文档/提交清单.md"
+      ],
+      "evidence": [
+        "documents",
+        "user_review",
+        "github_delivery"
+      ],
+      "result": "pending"
+    }
+  }
+}

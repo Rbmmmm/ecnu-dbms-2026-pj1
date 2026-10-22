@@ -1,0 +1,250 @@
+{
+  "stage": "P2",
+  "scope": "W-005/W-006；T-01/02/05/06/07及T-11/12/13基础子集，真实MongoDB、两账号网页、进程重启。R编号仅验收上述子集。",
+  "requirements": {
+    "R-001": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-002": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart"
+      ]
+    },
+    "R-003": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-005": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run"
+      ]
+    },
+    "R-006": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T07_account_hash_session_expiry_logout_rotation",
+        "test_T07_same_username_concurrent_registration"
+      ]
+    },
+    "R-007": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T11_anonymous_and_write_ownership"
+      ]
+    },
+    "R-008": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T02_draft_validation_revision_and_frozen_content"
+      ]
+    },
+    "R-009": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content"
+      ]
+    },
+    "R-010": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T11_anonymous_and_write_ownership",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-011": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/domain.py",
+        "app/schemas.py"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-016": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/domain.py",
+        "app/schemas.py"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-017": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-018": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T11_anonymous_and_write_ownership",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-019": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/statistics.py"
+      ],
+      "tests": [
+        "test_T06_F01_single_counts_zero_anonymous_refresh"
+      ]
+    },
+    "R-022": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/statistics.py"
+      ],
+      "tests": [
+        "test_T06_F01_single_counts_zero_anonymous_refresh"
+      ]
+    },
+    "R-023": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-024": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T12_basic_origin_and_input_safety"
+      ]
+    },
+    "R-027": {
+      "scope": "P2单选闭环与基础约束；其余见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart"
+      ]
+    }
+  },
+  "deferred": [
+    "P3: T-03/04完整跳转和所有题型、T-08—10时间并发竞争、T-11—13完整边界，F-01全部题型/F-02",
+    "P4: 全部要求独立验收与测试审查",
+    "P5/P6: 最终报告、提交包和第二阶段继承封存"
+  ]
+}

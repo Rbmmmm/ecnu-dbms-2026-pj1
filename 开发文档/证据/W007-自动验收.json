@@ -1,0 +1,288 @@
+{
+  "date": "2026-10-15T11:20:59.955253+00:00",
+  "command": [
+    "scripts/verify.py",
+    "--stage",
+    "W007",
+    "--node",
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "--playwright-module",
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+    "--chromium",
+    "/Users/renbeiming/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+  ],
+  "stage": "W007",
+  "result": "passed",
+  "checks": {
+    "preflight": "passed",
+    "api_database": {
+      "result": "passed",
+      "count": 55,
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T03_multiple_match_modes[all-operand2-answer2-False]",
+        "test_T03_multiple_match_modes[all-operand3-answer3-True]",
+        "test_T03_multiple_match_modes[any-operand0-answer0-True]",
+        "test_T03_multiple_match_modes[any-operand1-answer1-False]",
+        "test_T03_multiple_match_modes[exact-operand4-answer4-True]",
+        "test_T03_multiple_match_modes[exact-operand5-answer5-False]",
+        "test_T03_number_operators_and_null[eq-expected0]",
+        "test_T03_number_operators_and_null[gt-expected2]",
+        "test_T03_number_operators_and_null[gte-expected3]",
+        "test_T03_number_operators_and_null[lt-expected4]",
+        "test_T03_number_operators_and_null[lte-expected5]",
+        "test_T03_number_operators_and_null[ne-expected1]",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries",
+        "test_T04_constraints_optional_values_and_types[multiple-validation1-valid1-invalid1]",
+        "test_T04_constraints_optional_values_and_types[number-validation3-valid3-invalid3]",
+        "test_T04_constraints_optional_values_and_types[single-validation0-valid0-invalid0]",
+        "test_T04_constraints_optional_values_and_types[text-validation2-valid2-invalid2]",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[backward]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[count_exceeds_options]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[duplicate_rule_operand]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[duplicate_text]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[empty_rule_operand]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[forward_reference_missing]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[integer_empty_range]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[min_gt_max]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[optional_max_zero]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[text_options]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[text_rule]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[text_zero]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[unknown_rule_option]",
+        "test_T04_incomplete_draft_saves_but_publish_rejects[wrong_operator]",
+        "test_T04_required_all_types_and_missing_key[multiple-empty1]",
+        "test_T04_required_all_types_and_missing_key[number-None]",
+        "test_T04_required_all_types_and_missing_key[single-None]",
+        "test_T04_required_all_types_and_missing_key[text-  ]",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_unicode_codepoints",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T07_account_hash_session_expiry_logout_rotation",
+        "test_T07_same_username_concurrent_registration",
+        "test_T11_anonymous_and_write_ownership",
+        "test_T12_basic_origin_and_input_safety",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T13_real_validators_indexes_and_unknown_version"
+      ]
+    },
+    "w007_browser": {
+      "checks": {
+        "editor_all_types_constraints_rules": "passed",
+        "backtrack_pending_reuse_and_error_preservation": "passed",
+        "old_evaluation_discarded_and_end_not_submitted": "passed",
+        "end_clear_and_no_resurrection": "passed",
+        "first_matching_rule_and_explicit_submission": "passed",
+        "unicode_input_not_utf16_truncated": "passed",
+        "page_identity_console_and_mobile": "passed"
+      },
+      "console": [],
+      "screenshots": [
+        "w007-editor.png",
+        "w007-pending-reused.png",
+        "w007-end-confirmation.png",
+        "w007-mobile.png"
+      ],
+      "flow": "编辑全部题型和规则 → F-02回退/pending/END/无复活 → 首条命中 → 显式提交",
+      "summary": {
+        "survey_id": "6ad0b7250b098d3a7cd4cada",
+        "question_ids": [
+          "ed701146-420c-4636-8e87-a587f1b035cd",
+          "a34d8234-85c2-4d5d-a40a-5aea56f08c2c",
+          "b4988cac-bc67-477c-8113-3ceabc663fbe",
+          "8fe40bb6-98fe-485f-9c64-432e983aedf9",
+          "c6ab689a-47be-41fe-860b-c58c0d91770f"
+        ],
+        "option_ids": {
+          "A": "62e99d3b-268f-4337-83ac-51c9ccad41da",
+          "B": "43c99012-367a-4c87-a7ed-23ff53659102",
+          "END": "c08633f7-54ae-49c0-b77f-6858b3d5e65f",
+          "X": "ebed5838-ea17-49a1-9db5-4c7534433a80",
+          "Y": "ced5705f-a877-4791-890d-b71e86144521"
+        },
+        "submission_count": 2,
+        "respondent_count": 1,
+        "expected_paths": [
+          [
+            "ed701146-420c-4636-8e87-a587f1b035cd",
+            "b4988cac-bc67-477c-8113-3ceabc663fbe",
+            "c6ab689a-47be-41fe-860b-c58c0d91770f"
+          ],
+          [
+            "ed701146-420c-4636-8e87-a587f1b035cd",
+            "a34d8234-85c2-4d5d-a40a-5aea56f08c2c",
+            "8fe40bb6-98fe-485f-9c64-432e983aedf9",
+            "c6ab689a-47be-41fe-860b-c58c0d91770f"
+          ]
+        ]
+      }
+    },
+    "process_restart_persistence": "passed",
+    "browser": {
+      "flow": "register → login → draft → publish → login as another account → answer → confirm → submit → owner statistics → server restart",
+      "checks": {
+        "creator_draft_publish_share": "passed",
+        "confirmation_does_not_save": "passed",
+        "truncated_response_same_content_recovery": "passed",
+        "statistics_zero_options_and_privacy": "passed",
+        "page_identity": "passed",
+        "not_blank": "passed",
+        "no_framework_overlay": "passed",
+        "mobile_no_horizontal_overflow": "passed",
+        "console_health": "passed"
+      },
+      "console": [
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+          "url": "http://127.0.0.1:53324/api/v1/auth/me"
+        }
+      ],
+      "screenshots": [
+        "statistics-desktop.png",
+        "submission.png",
+        "statistics-mobile.png"
+      ],
+      "summary": {
+        "survey_id": "6ad0b7230b098d3a7cd4cad4",
+        "submission_count": 1,
+        "respondent_count": 1
+      }
+    }
+  },
+  "run_id": "c76e6bad8f19427ab5f0c9ae27cbaa9b",
+  "version": {
+    "head": "eee15378ce4681e39472a864f19d9c08ea140841",
+    "dirty": true,
+    "status": "M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/01-\\346\\216\\250\\350\\277\\233\\350\\256\\241\\345\\210\\222\\344\\270\\216\\351\\252\\214\\346\\224\\266.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/03-\\346\\265\\213\\350\\257\\225\\344\\270\\216\\350\\257\\201\\346\\215\\256\\347\\256\\241\\347\\220\\206.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/04-AI\\350\\256\\260\\345\\275\\225\\344\\270\\216\\346\\217\\220\\344\\272\\244\\346\\226\\207\\346\\241\\243.md\"\n M \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/06-\\350\\246\\201\\346\\261\\202\\345\\257\\271\\347\\205\\247\\344\\270\\216\\346\\257\\217\\350\\275\\256\\346\\243\\200\\346\\237\\245.md\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-END\\347\\241\\256\\350\\256\\244.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-pytest.xml\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\345\\233\\236\\351\\200\\200\\345\\200\\231\\351\\200\\211\\345\\244\\215\\347\\224\\250.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\347\\247\\273\\345\\212\\250\\351\\241\\265\\351\\235\\242.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\347\\274\\226\\350\\276\\221\\351\\205\\215\\347\\275\\256.png\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\350\\207\\252\\345\\212\\250\\351\\252\\214\\346\\224\\266.json\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\351\\252\\214\\346\\224\\266.md\"\n?? \"\\345\\274\\200\\345\\217\\221\\346\\226\\207\\346\\241\\243/\\350\\257\\201\\346\\215\\256/W007-\\351\\252\\214\\350\\257\\201\\345\\231\\250\\345\\217\\215\\344\\276\\213.json\"",
+    "file_sha256": {
+      "app/.DS_Store": "f8f2c383f8377e3131158add8836d955fc4dc5cc164abd0e65cd193449275edb",
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/config.py": "60c054fc02b4eab4a51ce18c48cddb5f646a66e0670a2dc4cf89bc7330530016",
+      "app/db.py": "173686d176707034b326b944388f7fdf77e1fc1bcc94324ecb03d21a8bf16a5f",
+      "app/decimal_values.py": "2074bff8a580cb96a9ab6bfb2e924065baaad15961b598225cce202e8694f19b",
+      "app/domain.py": "de1335b044ef9d226323d4c7bd9b1b390e1ec7a33f7819a0dca10a3e41c818f6",
+      "app/main.py": "c1164142a74096df7bd1ac63868b43750b807d04dae3202055cac5cf0cd3caab",
+      "app/schemas.py": "fad006bed86f136165abe62996a36b39edce4aba0dfea3c6f7ded6588e7851ab",
+      "app/static/app.js": "8ff06b45c9006028d15e664e049819a44a880132f155cdd97fdddb86b2e374ba",
+      "app/static/style.css": "aca9a69d1f464e982155029f0feb5c86025b602700271d792d9e9b130050349d",
+      "app/statistics.py": "4c7d7818a0cdff9f52649cd0f4dd640b3ac5d382206cfcc85ec32257e15f8427",
+      "app/templates/page.html": "78352d634c6c0eac7ec3cede5a6c66f7edb88cc6578305b194be5d6521f81533",
+      "scripts/.DS_Store": "4d6412b3f14a304267e8be64fa426b0dfb81bc7cf9bc821027d94c0615fd945c",
+      "scripts/init_db.py": "7dfecb9a30208852db07419f9cd2bf41d67c2eb41fe9214b08c03c7bd740d561",
+      "scripts/run.py": "cfb1fb3f0f3f0ab9f2696947578f6672aa5cd92b762bc16362a716754e3018b6",
+      "scripts/test_server.py": "d7e5068cb48c18396fca3c9e1ae05745cbeec6c85329d0670cab838b12f319ee",
+      "scripts/verify.py": "4e2d4153e4960ad13f2e2afc629c141afd46b9288f8a50f4df5d36559908611e",
+      "tests/.DS_Store": "11765d77a061881a746d005c128b46022dcdb6bea81d31ced28c851be4967e4e",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/browser.cjs": "ef34c3ca52ff7c472f6740c2a519e7d398f20dca61dd6a8aa6dd478a358da71b",
+      "tests/browser_w007.cjs": "0447079bec2cc2bc5b70f7df2e8af8bffa21074597d0ca849191baa4c4b06f6e",
+      "tests/conftest.py": "80b6abe042da65e6bb4c0d628064b0b16ed96d3681bcfab6d9dc5052892bfe75",
+      "tests/fixtures_f02.py": "48f0bca2a811a93f09edccdc5822904eec01d36d76d5e44fd083f485b5aba3b7",
+      "tests/manual-review.json": "979619dae930d885e0b929fb7bd79bed9850648c087f080235305d1437dbc75e",
+      "tests/original-materials.json": "4112ee0e86901036f41629930f8d81bf5b6f51783f77d366b33a795eb366a680",
+      "tests/requirements-map-w007.json": "51fa7367b5da3c396687a165fe3256725306d5a428d2f8c0617fb5009ad646ae",
+      "tests/requirements-map.json": "01e5b2bfa012679d59e83799712e12540305748f4254dd098ec5a6f7649c7dae",
+      "tests/test_p2.py": "6c64ddabc871ad434cdd83942f18f93129a802a9de7dc5161b0fe8f18e71198e",
+      "tests/test_w007.py": "e0813fd67271ef3d4dc70e3f5b4c2187182dddace1f132ac8b54b1b5b4c6898e",
+      "requirements.lock.txt": "d3d01114c041e5a8a95cb8d907df118e4a808461ced73b2713a09d0321c07177",
+      "README.md": "c164ae81ab14d1ef234499a05abe4771bef47b174ba673f8326e287d153da31a"
+    }
+  },
+  "api_command": [
+    "/opt/homebrew/Caskroom/miniconda/base/envs/contemporary_db/bin/python",
+    "-m",
+    "pytest",
+    "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/tests/test_p2.py",
+    "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/tests/test_w007.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/artifacts/c76e6bad8f19427ab5f0c9ae27cbaa9b/pytest.xml"
+  ],
+  "browser_command": [
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/tests/browser.cjs"
+  ],
+  "database_contract": {
+    "survey_users": {
+      "validator": true,
+      "indexes": [
+        "_id_",
+        "username_unique"
+      ]
+    },
+    "survey_sessions": {
+      "validator": true,
+      "indexes": [
+        "_id_",
+        "token_unique",
+        "session_expiry"
+      ]
+    },
+    "survey_surveys": {
+      "validator": true,
+      "indexes": [
+        "_id_",
+        "owner_created"
+      ]
+    },
+    "survey_responses": {
+      "validator": true,
+      "indexes": [
+        "_id_",
+        "submission_unique",
+        "once_per_account",
+        "survey_created"
+      ]
+    }
+  },
+  "stored_document_check": {
+    "accounts": 2,
+    "surveys": 1,
+    "responses": 1,
+    "path_length": 2,
+    "nonempty_answers": 1,
+    "anonymous": true
+  },
+  "w007_browser_command": [
+    "/Users/renbeiming/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "/Users/renbeiming/Documents/DASE专业课/当代数据管理系统(26秋)/大作业仓库/大作业一/tests/browser_w007.cjs"
+  ],
+  "w007_stored_documents": {
+    "paths": [
+      [
+        "ed701146-420c-4636-8e87-a587f1b035cd",
+        "b4988cac-bc67-477c-8113-3ceabc663fbe",
+        "c6ab689a-47be-41fe-860b-c58c0d91770f"
+      ],
+      [
+        "ed701146-420c-4636-8e87-a587f1b035cd",
+        "a34d8234-85c2-4d5d-a40a-5aea56f08c2c",
+        "8fe40bb6-98fe-485f-9c64-432e983aedf9",
+        "c6ab689a-47be-41fe-860b-c58c0d91770f"
+      ]
+    ],
+    "nonempty_answers": [
+      2,
+      3
+    ],
+    "number_bson": "Decimal128(18)",
+    "all_responses": 3
+  },
+  "scope": "W-007配置/全题型/约束/三类跳转/回退清理验收，含P2完整回归。此入口不代表P3完整验收。",
+  "not_executed": [
+    "W-008: 全类型统计与内容分页/F-01全部预期、截止修改、并发重复/关闭竞争、T-08—13收尾",
+    "P4/P5/P6: 全量独立验收、最终文档/提交复现和继承封存"
+  ],
+  "test_database_cleaned": true
+}

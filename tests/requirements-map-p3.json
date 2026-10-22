@@ -1,0 +1,528 @@
+{
+  "stage": "P3",
+  "scope": "P3全部第一阶段业务验收：P2/W007完整回归及W008统计、分页、匿名、截止、并发/重试、关闭竞争、安全与工程边界。P4独立验收和P5/P6最终交付未执行。",
+  "requirements": {
+    "R-001": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-002": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart"
+      ]
+    },
+    "R-003": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-005": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-006": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T07_account_hash_session_expiry_logout_rotation",
+        "test_T07_same_username_concurrent_registration"
+      ]
+    },
+    "R-007": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T11_anonymous_and_write_ownership"
+      ]
+    },
+    "R-008": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-009": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T08_deadline_management_utc_milliseconds_frozen_and_recovery",
+        "test_T08_exact_deadline_submission_boundary",
+        "test_T10_accepted_inflight_then_closed_or_expired"
+      ]
+    },
+    "R-010": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T11_anonymous_and_write_ownership",
+        "test_T05_two_questions_explicit_optional_skip"
+      ]
+    },
+    "R-011": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/domain.py",
+        "app/schemas.py",
+        "app/decimal_values.py"
+      ],
+      "tests": [
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-016": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js",
+        "app/domain.py",
+        "app/schemas.py",
+        "app/decimal_values.py"
+      ],
+      "tests": [
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-017": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/decimal_values.py",
+        "app/domain.py",
+        "app/main.py",
+        "app/schemas.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T03_multiple_match_modes",
+        "test_T03_number_operators_and_null",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_unicode_codepoints",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T09_overlapping_keys_unique_indexes_and_conflicts",
+        "test_T09_ten_accounts_concurrent_complete_documents",
+        "test_T09_write_succeeded_but_ack_lost_recovers_after_close",
+        "test_T10_accepted_inflight_then_closed_or_expired"
+      ]
+    },
+    "R-018": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T06_F01_full_statistics_contents_and_r5",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T09_overlapping_keys_unique_indexes_and_conflicts",
+        "test_T11_anonymous_and_write_ownership",
+        "test_T11_content_deadline_permissions_pagination_and_whitelists"
+      ]
+    },
+    "R-019": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T06_F01_full_statistics_contents_and_r5",
+        "test_T06_F01_single_counts_zero_anonymous_refresh"
+      ]
+    },
+    "R-022": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T06_F01_full_statistics_contents_and_r5",
+        "test_T06_F01_single_counts_zero_anonymous_refresh"
+      ]
+    },
+    "R-023": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/decimal_values.py",
+        "app/domain.py",
+        "app/main.py",
+        "app/schemas.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart",
+        "test_T02_draft_validation_revision_and_frozen_content",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T03_multiple_match_modes",
+        "test_T03_number_operators_and_null",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_unicode_codepoints",
+        "test_T05_database_failure_and_retry_receipt",
+        "test_T05_explicit_confirmation_validation_and_atomic_document",
+        "test_T05_two_questions_explicit_optional_skip",
+        "test_T06_F01_full_statistics_contents_and_r5",
+        "test_T06_F01_single_counts_zero_anonymous_refresh",
+        "test_T08_exact_deadline_submission_boundary",
+        "test_T09_ten_accounts_concurrent_complete_documents"
+      ]
+    },
+    "R-024": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/config.py",
+        "app/db.py",
+        "app/decimal_values.py",
+        "app/domain.py",
+        "app/main.py",
+        "app/schemas.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T03_multiple_match_modes",
+        "test_T03_number_operators_and_null",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_unicode_codepoints",
+        "test_T12_basic_origin_and_input_safety",
+        "test_T12_request_source_and_html_preserved_as_data",
+        "test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run",
+        "test_T13_real_validators_indexes_and_unknown_version",
+        "test_T13_resources_and_startup_contract_failures"
+      ]
+    },
+    "R-027": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/main.py",
+        "app/db.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T01_ownership_and_app_restart"
+      ]
+    },
+    "R-012": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-013": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-014": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-015": {
+      "scope": "P3全部业务（含P2/W007回归）；最终说明与交付见deferred",
+      "sources": [
+        "app/schemas.py",
+        "app/domain.py",
+        "app/decimal_values.py",
+        "app/static/app.js"
+      ],
+      "tests": [
+        "test_T03_F02_paths_priority_and_storage",
+        "test_T03_F02_backtrack_pending_and_no_resurrection",
+        "test_T03_F02_stale_branches_and_pending_cannot_submit",
+        "test_T03_number_operators_and_null",
+        "test_T03_multiple_match_modes",
+        "test_T03_configuration_change_drives_behavior",
+        "test_T04_constraints_optional_values_and_types",
+        "test_T04_required_all_types_and_missing_key",
+        "test_T04_unicode_codepoints",
+        "test_T04_decimal_precision_bson_and_equivalent_retry",
+        "test_T04_incomplete_draft_saves_but_publish_rejects",
+        "test_T04_structure_engineering_and_decimal_configuration_rejected",
+        "test_T04_fractional_integer_bounds_with_feasible_integer",
+        "test_T04_canonical_empty_and_equivalent_multiple_number_retries"
+      ]
+    },
+    "R-020": {
+      "scope": "P3全部题型统计及内容",
+      "sources": [
+        "app/config.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T06_F01_full_statistics_contents_and_r5"
+      ]
+    },
+    "R-021": {
+      "scope": "P3全部题型统计及内容",
+      "sources": [
+        "app/config.py",
+        "app/main.py",
+        "app/static/app.js",
+        "app/statistics.py",
+        "app/time_values.py"
+      ],
+      "tests": [
+        "test_T06_F01_full_statistics_contents_and_r5",
+        "test_T06_contents_equal_timestamps_use_id_tiebreaker",
+        "test_T06_decimal_mean_precision_rounding_and_overflow"
+      ]
+    }
+  },
+  "deferred": [
+    "P4/W009：从原题独立全量验收、定点修复与要求索引复核",
+    "P5/P6/W010：提交说明与报告、独立安装复现、用户文字/贡献审核及v1封存"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "checks": {
+    "editor_all_types_constraints_rules": "passed",
+    "backtrack_pending_reuse_and_error_preservation": "passed",
+    "old_evaluation_discarded_and_end_not_submitted": "passed",
+    "end_clear_and_no_resurrection": "passed",
+    "first_matching_rule_and_explicit_submission": "passed",
+    "unicode_input_not_utf16_truncated": "passed",
+    "page_identity_console_and_mobile": "passed"
+  },
+  "console": [],
+  "screenshots": [
+    "w007-editor.png",
+    "w007-pending-reused.png",
+    "w007-end-confirmation.png",
+    "w007-mobile.png"
+  ],
+  "flow": "编辑全部题型和规则 → F-02回退/pending/END/无复活 → 首条命中 → 显式提交",
+  "expected_console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+      "url": "http://127.0.0.1:59001/api/v1/fill/6ad0e64d83bb2e01e00d8912/evaluate"
+    }
+  ],
+  "summary": {
+    "survey_id": "6ad0e64d83bb2e01e00d8912",
+    "question_ids": [
+      "4fc0c464-fa78-4cae-96a2-9d8b291e9c70",
+      "ff12b976-e78e-481a-aba9-adf7c5a4b519",
+      "96d69db2-7600-4b4f-9372-4f71d63a46bd",
+      "7228fe85-9373-49ab-9e1c-685df1e9e476",
+      "42e7dece-669b-4322-a77c-3e7a873b5248"
+    ],
+    "option_ids": {
+      "A": "9bd64622-418f-4471-b570-f82980418f71",
+      "B": "68b65472-0c09-4fd7-8f87-1393bef7bd34",
+      "END": "981d4132-f5b4-456c-a250-222420f4812e",
+      "X": "f7cbcd16-c221-4ede-94b3-91e643c7c2f1",
+      "Y": "07ea4950-b476-4f4f-b655-962bb5f3cdc0"
+    },
+    "submission_count": 2,
+    "respondent_count": 1,
+    "expected_paths": [
+      [
+        "4fc0c464-fa78-4cae-96a2-9d8b291e9c70",
+        "96d69db2-7600-4b4f-9372-4f71d63a46bd",
+        "42e7dece-669b-4322-a77c-3e7a873b5248"
+      ],
+      [
+        "4fc0c464-fa78-4cae-96a2-9d8b291e9c70",
+        "ff12b976-e78e-481a-aba9-adf7c5a4b519",
+        "7228fe85-9373-49ab-9e1c-685df1e9e476",
+        "42e7dece-669b-4322-a77c-3e7a873b5248"
+      ]
+    ]
+  }
+}

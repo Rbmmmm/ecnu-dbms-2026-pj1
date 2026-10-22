@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="16" time="1.753" timestamp="2026-10-16T20:27:40.904517+08:00" hostname="MacBook-Pro-112.local"><testcase classname="tests.test_p4" name="test_T01_P4_list_pages_ownership_and_readonly" time="0.344" /><testcase classname="tests.test_p4" name="test_T02_P4_concurrent_revision_keeps_whole_winner" time="0.087" /><testcase classname="tests.test_p4" name="test_T03_P4_renamed_F02_ids_and_titles_keep_paths" time="0.092" /><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values0]" time="0.092"><failure message="AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}&#10;assert '0.00' == '0.33'&#10;  &#10;  - 0.33&#10;  + 0.00">tests/test_p4.py:124: in test_T06_P4_finite_cancellation_independent_arithmetic
+    assert actual['average_display'] == '0.33', actual
+E   AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}
+E   assert '0.00' == '0.33'
+E     
+E     - 0.33
+E     + 0.00</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values1]" time="0.090"><failure message="AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}&#10;assert '0.00' == '0.33'&#10;  &#10;  - 0.33&#10;  + 0.00">tests/test_p4.py:124: in test_T06_P4_finite_cancellation_independent_arithmetic
+    assert actual['average_display'] == '0.33', actual
+E   AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}
+E   assert '0.00' == '0.33'
+E     
+E     - 0.33
+E     + 0.00</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values2]" time="0.091"><failure message="AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}&#10;assert '0.00' == '0.33'&#10;  &#10;  - 0.33&#10;  + 0.00">tests/test_p4.py:124: in test_T06_P4_finite_cancellation_independent_arithmetic
+    assert actual['average_display'] == '0.33', actual
+E   AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}
+E   assert '0.00' == '0.33'
+E     
+E     - 0.33
+E     + 0.00</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values3]" time="0.090" /><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values4]" time="0.091"><failure message="AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}&#10;assert '0.00' == '0.33'&#10;  &#10;  - 0.33&#10;  + 0.00">tests/test_p4.py:124: in test_T06_P4_finite_cancellation_independent_arithmetic
+    assert actual['average_display'] == '0.33', actual
+E   AssertionError: {'id': '00000000-0000-0000-0000-000000000001', 'title': '边界题', 'kind': 'number', 'answered_submission_count': 3, ...}
+E   assert '0.00' == '0.33'
+E     
+E     - 0.33
+E     + 0.00</failure></testcase><testcase classname="tests.test_p4" name="test_T06_P4_finite_cancellation_independent_arithmetic[values5]" time="0.090" /><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[draft]" time="0.089"><failure message="AssertionError: ('draft', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('draft', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[publish]" time="0.085"><failure message="AssertionError: ('publish', 409, '{&quot;error&quot;:{&quot;code&quot;:&quot;REVISION_OR_STATE_CONFLICT&quot;,&quot;message&quot;:&quot;状态或版本已改变&quot;,&quot;fields&quot;:[]}}')&#10;assert 409 == 422&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('publish', 409, '{"error":{"code":"REVISION_OR_STATE_CONFLICT","message":"状态或版本已改变","fields":[]}}')
+E   assert 409 == 422
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[deadline]" time="0.086"><failure message="AssertionError: ('deadline', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('deadline', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[close]" time="0.090"><failure message="AssertionError: ('close', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('close', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[list]" time="0.094"><failure message="AssertionError: ('list', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('list', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[text_contents]" time="0.084"><failure message="AssertionError: ('text_contents', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('text_contents', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_p4" name="test_T13_P4_oversized_database_integers_are_422[number_contents]" time="0.091"><failure message="AssertionError: ('number_contents', 500, 'Internal Server Error')&#10;assert 500 == 422&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">tests/test_p4.py:148: in test_T13_P4_oversized_database_integers_are_422
+    assert result.status_code == 422, (operation,result.status_code,result.text)
+E   AssertionError: ('number_contents', 500, 'Internal Server Error')
+E   assert 500 == 422
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase></testsuite></testsuites>

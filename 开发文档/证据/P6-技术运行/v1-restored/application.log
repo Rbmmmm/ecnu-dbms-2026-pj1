@@ -1,0 +1,25 @@
+{'survey_users': {'validator': True, 'indexes': ['_id_', 'username_unique']}, 'survey_sessions': {'validator': True, 'indexes': ['_id_', 'token_unique', 'session_expiry']}, 'survey_surveys': {'validator': True, 'indexes': ['_id_', 'owner_created']}, 'survey_responses': {'validator': True, 'indexes': ['_id_', 'submission_unique', 'once_per_account', 'survey_created']}}
+INFO:     Started server process [93789]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:59722 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [93789]
+INFO:     Started server process [93790]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:59722 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [93790]
+INFO:     Started server process [93829]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:59722 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [93829]
