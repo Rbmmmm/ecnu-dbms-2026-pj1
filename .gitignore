@@ -8,3 +8,17 @@ __pycache__/
 node_modules/
 artifacts/
 .DS_Store
+
+# 本地开发资料；公开仓库只保留运行、测试和提交文档
+AGENTS.md
+开发文档/
+大作业一第一阶段.docx
+大作业一第一阶段.md
+scripts/verify.py
+scripts/p4_audit.py
+scripts/p6_acceptance.py
+tests/manual-review.json
+tests/delivery-review.json
+tests/delivery-qa.json
+tests/original-materials.json
+tests/requirements-map*.json

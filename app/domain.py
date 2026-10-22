@@ -59,7 +59,7 @@ def publish_issues(survey):
             if kind == 'multiple':
                 operand = rule['operand']
                 if not operand or len(set(operand)) != len(operand) or not set(operand) <= options:
-                    add('多选规则需非空、不重复且存在的选项集合', qid, 'rules')
+                    add('多选规则至少指定一个选项，且选项不能重复或不存在', qid, 'rules')
             target = rule['target']
             if target != 'END' and (target not in positions or positions[target] <= index):
                 add('跳转目标须为后续题或结束', qid, 'rules')
@@ -87,7 +87,7 @@ def normalize_answer(question, value):
     if kind == 'text':
         value = value.strip()
         if len(value) > LIMITS['text_answer']:
-            invalid('文本答案不能超过工程上限10000个码点')
+            invalid('文本答案不能超过10000个字符')
         return value or None
     if not value.strip():
         return None

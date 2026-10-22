@@ -1,10 +1,10 @@
 # 运行与 API 说明
 
-本说明面向第一阶段源代码的安装、页面使用和 API 调用。实际业务由 Python 3.11、FastAPI、PyMongo、Jinja2 与原生 JavaScript 实现，数据库使用 MongoDB Community 8.0.32。安装及验收的实际结果另见测试证据；本说明本身不表示 P5/P6 已验收。
+本说明介绍第一阶段源代码的安装、页面操作和 API 调用。应用使用 Python 3.11、FastAPI、PyMongo、Jinja2 与原生 JavaScript，已在 MongoDB Community 8.0.32 上完成验证。安装和回归的具体结果见《测试用例与结果》。
 
 ## 1. 安装与启动
 
-先准备 Python 3.11 和可连接的 MongoDB。课程环境优先只读检查助教提供的阿里云地址，确认无法连接后使用本地数据库；本项目沿用已有本地 MongoDB 服务。应用不会自动切换数据库，也不会把域名解析失败解释成密码错误。配置时使用已经确认的本人数据库，避免操作其他人的数据。
+运行前需要准备 Python 3.11，并确认配置中的 MongoDB 可以连接。课程环境仍按“先只读检查阿里云，连接失败后使用本地数据库”的顺序处理；应用不会自动切换连接。项目此前已在本机 MongoDB 上完成验证，启动前仍须检查服务状态。数据库名使用本人已确认的名称；域名解析失败发生在认证之前，不能据此判断密码错误。
 
 在新取得的项目根目录创建独立 Python 环境：
 
@@ -33,7 +33,7 @@ python scripts/init_db.py
 python scripts/run.py
 ```
 
-默认打开 `http://127.0.0.1:8000`。`GET /health` 返回 200 和 `status=ready` 表示连接与数据库契约检查通过。当前功能标识是 `stage=P4, work_package=W-009, schema_version=1`；这个健康状态不是提交文档或用户终审的结论。停止应用使用 Ctrl+C，不需要停止 MongoDB。
+默认打开 `http://127.0.0.1:8000`。`GET /health` 返回 200 和 `status=ready` 表示连接、validator 与索引检查通过；未知存量 schema 版本在启动初始化时检查。停止应用使用 Ctrl+C，不需要停止 MongoDB。
 
 如果 8000 端口已有服务，可将配置中的 `SURVEY_ORIGIN` 改为 `http://127.0.0.1:18000`，并从项目根目录执行：
 
@@ -107,7 +107,7 @@ ObjectId 对外为 24 位小写十六进制字符串，题目、选项和提交�
 
 ## 5. 完整请求示例
 
-以下是供调用者填写的请求格式示例，不是声称已经发生的执行记录。先注册、登录，再把实际返回 ID 与 revision 用于后续请求。测试结果及真实输入输出另列于测试文档。
+以下示例演示从注册到提交的请求格式。调用时使用前一步实际返回的 ID 和 revision；示意 ID、账号和日期不代表测试执行记录。真实测试输入与输出见《测试用例与结果》。
 
 ```http
 POST /api/v1/auth/register
@@ -206,24 +206,39 @@ X-Survey-Request: 1
 
 常见业务码包括 `REVISION_OR_STATE_CONFLICT`、`INVALID_CONFIGURATION`、`STALE_BRANCH_ANSWERS`、`KEY_REUSED_WITH_DIFFERENT_CONTENT`、`ALREADY_SUBMITTED`、`NOT_ACCEPTING`。evaluate 的结构合法请求可用 200 返回题目级 `errors`，调用者仍须检查 `ready_to_submit` 和 `errors`，不能仅凭 HTTP 200 显示可提交。
 
-## 6. 回归与基线入口
+## 6. 测试与基线入口
 
-完整源代码仓库中执行 P4 功能回归：
+测试使用本机 `127.0.0.1:27017` 的真实 MongoDB，自动创建并清理经过校验的 `survey_test_<run_id>` 隔离数据库，不使用业务 `.env` 指向的数据库。在项目根目录执行 API 与数据库测试：
 
 ```bash
-python scripts/verify.py --stage P4 --node /实际/node路径 --playwright-module /实际/playwright模块路径 --chromium /实际/Chromium路径
+python -m pytest tests/test_p2.py tests/test_w007.py tests/test_w008.py tests/test_p4.py -o addopts= -q
 ```
 
-浏览器路径按实际安装填写，也可设置 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM`。Node、Playwright 与 Chromium 是浏览器验收工具，不是应用运行依赖；不可把缺失浏览器步骤标成通过。
+四份测试文件及 fixtures 共同覆盖创建、题目编辑、跳转、校验、提交、统计，以及并发、权限和边界场景，共 101 个参数案例。输入、预期和实际结果见《测试用例与结果》。
 
-v1 样本与恢复验证使用独立入口：
+网页测试通过独立入口启动隔离服务并执行四套流程：
+
+```bash
+python scripts/test_browser.py
+```
+
+网页测试需要 Node.js、Playwright 与 Chromium。若尚未安装，在项目根目录执行：
+
+```bash
+npm install --prefix artifacts/browser-tools --no-save playwright@1.62.1
+node artifacts/browser-tools/node_modules/playwright/cli.js install chromium
+export SURVEY_PLAYWRIGHT_MODULE="$PWD/artifacts/browser-tools/node_modules/playwright"
+```
+
+然后重新执行网页测试命令。已有工具时，可用 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM` 指定路径。浏览器工具仅供网页测试使用，应用和 API 测试不需要安装。
+
+v1 样本的新建和恢复使用以下命令：
 
 ```bash
 python scripts/v1_baseline.py --output artifacts/v1-check
 python scripts/v1_baseline.py --restore 提交文档/附件/v1-baseline.json --output artifacts/v1-restore
-python scripts/verify.py --stage P6 --node /实际/node路径 --playwright-module /实际/playwright模块路径 --chromium /实际/Chromium路径
 ```
 
-这些入口只使用校验过的本地本轮隔离数据库，不接管业务 `.env` 指向的数据库。P6 在完整 Git 仓库内核对安装、样本、版本和交付材料；用户文字与贡献审核尚未完成时，即使技术检查通过也应返回非零并保存技术结果。真实结果以报告字段和退出码共同判断，不将预检查、测试收集或验证器反例代替完整阶段验收。
+每个输出目录须尚不存在。脚本在新隔离库中核对 4 个合成账号、3 份问卷和 8 份答卷，检查题意、字段、路径、统计、应用重启读取及未知 schema 版本拒绝。恢复使用新生成的临时测试会话，基线文件不包含明文密码或会话 cookie。
 
 接口依据：[app/main.py](../app/main.py)、[app/schemas.py](../app/schemas.py)、[app/config.py](../app/config.py)；锁定依赖见 [requirements.lock.txt](../requirements.lock.txt)。

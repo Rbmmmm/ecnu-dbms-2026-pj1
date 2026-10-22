@@ -1,10 +1,10 @@
 # MongoDB 问卷系统
 
-当代数据管理系统第一阶段个人作业，任北鸣。FastAPI + PyMongo + Jinja2 + 原生 JavaScript；所有持久业务数据存 MongoDB。支持注册登录、问卷草稿/发布/关闭、单选/多选/文本/数字、约束和可配置跳转、回退清理、匿名/重复限制、整卷/单题统计与内容分页。
+这是当代数据管理系统课程第一阶段的个人作业，作者任北鸣。系统使用 FastAPI、PyMongo、Jinja2 和原生 JavaScript，全部持久业务数据保存在 MongoDB。用户可以创建和发布问卷，配置单选、多选、文本、数字题及条件跳转；填写者登录后回答、回退修改并确认提交，创建者查看整卷、单题统计和填空内容。系统支持匿名选择、重复填写限制、截止设置和关闭问卷。
 
-[项目完成报告](提交文档/项目完成报告.md) · [系统与数据库设计](提交文档/系统与数据库设计.md) · [运行与 API](提交文档/运行与API说明.md) · [关键逻辑](提交文档/关键逻辑说明.md) · [测试结果](提交文档/测试用例与结果.md) · [AI 使用日志](提交文档/AI使用日志.md) · [提交清单](提交文档/提交清单.md)
+[项目报告 PDF](提交文档/2026_ECNU_PJ1_1_任北鸣.pdf) · [报告正文](提交文档/项目完成报告.md) · [系统与数据库设计](提交文档/系统与数据库设计.md) · [运行与 API](提交文档/运行与API说明.md) · [关键逻辑](提交文档/关键逻辑说明.md) · [测试结果](提交文档/测试用例与结果.md) · [AI 使用日志](提交文档/AI使用日志.md)
 
-仓库：[Rbmmmm/ecnu-dbms-2026-pj1](https://github.com/Rbmmmm/ecnu-dbms-2026-pj1)。报告文字与贡献归属仍待审核。
+仓库：[Rbmmmm/ecnu-dbms-2026-pj1](https://github.com/Rbmmmm/ecnu-dbms-2026-pj1)。
 
 ## 安装与启动
 
@@ -25,14 +25,14 @@ python -m pip check
 cp .env.example .env
 ```
 
-编辑 `.env` 中的 `SURVEY_DB` 为已确认的本人数据库；按课程约定优先只读测试阿里云，失败后使用本地。历史 W005 云端 ping 超时后采用本地，本轮未重测云端。此应用不会自动切换连接。不要把 `.env` 上传仓库。集合使用 `survey_` 前缀，保留实验 `users`。
+将 `.env` 中的 `SURVEY_DB` 改为本人已确认的数据库名，并填写对应连接。已有 `.env` 时直接检查配置，避免覆盖。课程环境优先只读检查阿里云，连接失败后使用本地 MongoDB；启动前确认数据库可连接，应用不会自动切换。集合统一使用 `survey_` 前缀，与课程实验的 `users` 集合分开；实际 `.env` 不上传仓库。`SURVEY_ORIGIN` 须与访问地址的协议、主机、端口完全一致，配置字段见[运行与 API 说明](提交文档/运行与API说明.md)。
 
 ```bash
 python scripts/init_db.py
 python scripts/run.py
 ```
 
-打开 [本机问卷系统](http://127.0.0.1:8000)。启动创建缺失集合/索引并检查已有契约，不自动迁移不兼容数据。`/health` 检查连接、validator 与索引，当前显示 P4/W-009 是业务功能基线，不能代表 P6 或用户终审；未知存量 schema 版本会在启动时拒绝。
+打开 [本机问卷系统](http://127.0.0.1:8000)。启动创建缺失集合/索引并检查已有契约，不清空业务数据，不自动迁移不兼容数据。`GET /health` 返回 `status=ready` 表示连接、validator 与索引检查通过；未知存量 schema 版本在启动时拒绝。
 
 需要其他端口时同时将 `.env` 的 `SURVEY_ORIGIN` 改为 `http://127.0.0.1:18000`，然后执行：
 
@@ -46,38 +46,36 @@ python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 18000
 
 单选同时显示按账号去重的人数与答卷次数；多选计选择次数；数字均值排除空答、保留 0。回退删除确定跳过的答案，尚未确定可达的后续答案只在当前页暂存。未提交输入不保证刷新恢复；匿名不自动清除填写者主动写入文本的姓名；统计不同查询不承诺同一快照。
 
-## 运行固定测试
+## 运行测试
 
-真实 MongoDB 必须在本机 127.0.0.1:27017。下列测试自行创建本轮隔离库并清理，不继承业务连接，不操作业务库。
+测试需要本机 `127.0.0.1:27017` 的真实 MongoDB。测试自行创建 `survey_test_<run_id>` 隔离数据库并在结束后清理，不使用业务 `.env` 中的数据库。API 与数据库测试：
 
 ```bash
 python -m pytest tests/test_p2.py tests/test_w007.py tests/test_w008.py tests/test_p4.py -o addopts= -q
-python scripts/v1_baseline.py --output artifacts/v1-check
-python scripts/v1_baseline.py --restore 提交文档/附件/v1-baseline.json --output artifacts/v1-restore
 ```
 
-每个 v1 输出路径须尚不存在。封存恢复会验证 4 个合成账号、3 份问卷和 8 份答卷的题意/字段/路径、全类型统计、应用重启和未知 schema 启动拒绝；只恢复到新建的本轮隔离库。归档不含明文密码和会话 cookie，恢复读取使用新生成的隔离测试会话。
-
-完整 Git 仓库另提供 `scripts/verify.py` 的 P2/W007/P3/P4/P6 全量入口。精简运行复现包只用于验证安装、上述 101 个 API 案例及 v1 恢复，不替代 GitHub 完整源码提交或用户终审。完整网页回归还需要 Node.js、Playwright 和 Chromium；P6 还通过 Poppler 的 `pdfinfo`、`pdftotext` 检查报告。仅启动应用或运行 API 测试不需要这些工具。
+固定用例覆盖创建问卷、题目编辑、跳转、校验、提交与统计，以及权限、并发和数值边界，共 101 个参数案例。历史执行结果和具体输入输出见[测试用例与结果](提交文档/测试用例与结果.md)。网页测试另外需要 Node.js、Playwright 和 Chromium；仅启动应用或运行 API 测试不需要浏览器工具。
 
 如未安装浏览器工具，在项目根目录执行（Playwright 模块放在被 Git 忽略的 `artifacts/` 中，浏览器安装到默认用户缓存）：
 
 ```bash
 npm install --prefix artifacts/browser-tools --no-save playwright@1.62.1
 node artifacts/browser-tools/node_modules/playwright/cli.js install chromium
-export SURVEY_NODE="$(command -v node)"
 export SURVEY_PLAYWRIGHT_MODULE="$PWD/artifacts/browser-tools/node_modules/playwright"
-export SURVEY_CHROMIUM="$(node -p 'require(process.env.SURVEY_PLAYWRIGHT_MODULE).chromium.executablePath()')"
+python scripts/test_browser.py
 ```
 
-Poppler 在 macOS 可用 `brew install poppler`，Ubuntu/Debian 可用 `sudo apt-get install poppler-utils`。只运行完整业务回归时执行 `python scripts/verify.py --stage P4`。P6 入口在完整 Git 仓库执行：
+已有工具时，可用 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM` 指定路径。脚本在隔离数据库中启动测试服务并执行四套网页流程。
+
+第一阶段样本的新建与恢复：
 
 ```bash
-python scripts/verify.py --stage P6
+python scripts/v1_baseline.py --output artifacts/v1-check
+python scripts/v1_baseline.py --restore 提交文档/附件/v1-baseline.json --output artifacts/v1-restore
 ```
 
-也可用 `SURVEY_NODE`、`SURVEY_PLAYWRIGHT_MODULE`、`SURVEY_CHROMIUM` 配置已有浏览器工具。P6 实际重跑固定 P4 101 案例及四套网页，在不含实际 `.env` 的复现包中创建独立 Python 环境、安装锁定依赖、重跑全部 API 案例、创建并恢复 v1 样本。证据保存到 `artifacts/p6-运行号/`。缺文件、篡改包、过期审核、缺用户审核或 GitHub 发布核对未完成均不能成为 P6 通过；`--changed` 未实现。
+每个输出目录须尚不存在。脚本核对 4 个合成账号、3 份问卷和 8 份答卷的题意、字段、路径和统计，并检查应用重启后读取及未知 schema 版本拒绝。恢复只写入新建的隔离数据库，归档不含明文密码和会话 cookie。
 
-## 提交状态
+## 提交材料
 
-用户确认截止 2026 年 10 月 23 日 00:00（北京时间）。GitHub 需要可运行前后端、测试与本 README；水杉提交 `2026_ECNU_PJ1_1_任北鸣.pdf`，最前面放仓库链接。本仓库提供源码和测试；报告仍为待审核材料，尚未提交水杉。公开历史从第一阶段发布快照开始，保留现有核心结构、真实 AI 日志与阶段证据；含个人数据库标识的旧本地 Git 历史和旧内部 ZIP 不公开。完整 Git 仓库的当前证据及交接在 `开发文档/agent-handoff.md`；历史开发资料保留供追溯，没有整体复制为报告附件。
+本仓库提供前后端、MongoDB schema、配置、测试和课程要求的说明文档，文件对应关系见[提交清单](提交文档/提交清单.md)。水杉平台使用 `2026_ECNU_PJ1_1_任北鸣.pdf`；仓库保存同名报告供查阅，平台上传是单独的提交步骤。

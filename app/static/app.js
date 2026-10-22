@@ -78,7 +78,7 @@ async function auth() {
     event.preventDefault(); submit.disabled = true;
     try {
       const length = Array.from(password.value).length;
-      if (length > 128 || (registering && length < 8)) throw new Error('密码需8—128个Unicode码点，保留首尾空格。');
+      if (length > 128 || (registering && length < 8)) throw new Error('密码需8—128个字符，首尾空格也计入。');
       await api('/auth/' + (registering ? 'register' : 'login'), 'POST', {username: name.value, password: password.value});
       const next = safeNext(new URLSearchParams(location.search).get('next'));
       location.href = registering ? '/login?next=' + encodeURIComponent(next) : next;
@@ -91,7 +91,7 @@ let listOffset = 0;
 async function list() {
   const data = await api('/surveys?offset=' + listOffset); clear(); root.append(el('h1', '我的问卷'));
   button('创建问卷', async () => { const survey = await api('/surveys', 'POST', {}); location.href = '/surveys/' + survey.id + '/edit'; }, root, true);
-  root.append(el('p', '共 ' + data.total + ' 份问卷；此处只显示当前账号创建的问卷。'));
+  root.append(el('p', '共 ' + data.total + ' 份问卷。'));
   for (const s of data.items) {
     const card = el('section', undefined, {class: 'card'});
     const status=surveyState(s);
@@ -131,7 +131,6 @@ async function edit() {
       const input=field(label,survey[key],config,'checkbox');input.onchange=()=>survey[key]=input.checked;
     }
     deadlineInput=field('截止时间（北京时间，可留空）',deadlineRaw,config,'datetime-local');deadlineInput.step='0.001';deadlineInput.oninput=()=>deadlineRaw=deadlineInput.value;
-    root.append(el('p','工程上限：'+LIMITS.questions+'题，每题'+LIMITS.options+'选项、'+LIMITS.rules+'条规则；标题'+LIMITS.survey_title+'、说明'+LIMITS.description+'、题干'+LIMITS.question_title+'、选项'+LIMITS.option_text+'、文本答案'+LIMITS.text_answer+'个码点。草稿可不完整，发布前需修复所有问题。',{class:'muted'}));
     survey.questions.forEach((q,index)=>{
       const card=el('fieldset',undefined,{'data-question-id':q.id,'data-kind':q.kind});card.append(el('legend','第 '+(index+1)+' 题'));root.append(card);
       const kind=selectField('题型',kinds,q.kind,card);
@@ -152,10 +151,9 @@ async function edit() {
         input.oninput=()=>{q.validation[key]=input.value===''?null:q.kind==='number'?input.value:/^\d{1,5}$/.test(input.value)?Number(input.value):input.value;};
       }
       if(q.kind==='multiple')card.append(el('p','恰好选择 k 项：最少和最多都填 k。非必答可留空，一旦作答须满足数量限制。',{class:'muted'}));
-      if(q.kind==='text')card.append(el('p','首尾空白去除后按Unicode码点计数，组合表情可能计多个；上下界含端点。',{class:'muted'}));
+      if(q.kind==='text')card.append(el('p','字数不计首尾空白，部分表情会计作多个字符。',{class:'muted'}));
       if(q.kind==='number'){
         const integer=field('仅允许整数',q.validation.integer_only,card,'checkbox');integer.onchange=()=>q.validation.integer_only=integer.checked;
-        card.append(el('p','上下界含端点；18.0视作整数，0有效。数字按十进制字符串传输，须在Decimal128有限精度范围内无损表示。',{class:'muted'}));
       }
       if(q.kind==='text'&&q.rules.length)button('清除不适用规则',()=>{q.rules=[];render();},card);
       if(q.kind!=='text'){
@@ -208,7 +206,7 @@ async function manage(){
   const links=el('div',undefined,{class:'links'});root.append(links);link('打开填写页','/survey/'+sid,links);link('查看统计','/surveys/'+sid+'/statistics',links);
   if(survey.state==='published'){
     const deadline=field('截止时间（北京时间，可留空）',shanghaiInput(survey.deadline_at),root,'datetime-local');deadline.step='0.001';
-    root.append(el('p','只能设置未来时间或清除。到期后可延长恢复接收；手动关闭后不能重开。提交以服务端最后受理检查为准。',{class:'muted'}));
+    root.append(el('p','截止时间可留空或设为未来时间。到期后可延长截止，关闭后不能重新开放。',{class:'muted'}));
     button('保存截止时间',async()=>{await api('/surveys/'+sid+'/deadline','PATCH',{revision:survey.revision,deadline_at:deadlineUTC(deadline)});await manage();},root,true);
     button('清除截止时间',async()=>{await api('/surveys/'+sid+'/deadline','PATCH',{revision:survey.revision,deadline_at:null});await manage();});
     button('关闭问卷',async()=>{await api('/surveys/'+sid+'/close','POST',{revision:survey.revision});await manage();});
@@ -260,10 +258,10 @@ async function fill() {
         const input=field(q.kind==='text'?'回答内容':'数字答案',selected,card,q.kind==='text'?'textarea':'text');
         const hint=el('p',undefined,{class:'muted'});card.append(hint);
         if(q.kind==='number'){
-          input.inputMode='decimal';hint.textContent='最小值 '+(q.validation.min_value??'不限')+'，最大值 '+(q.validation.max_value??'不限')+(q.validation.integer_only?'，仅整数':'，可小数')+'。0有效，数字以十进制字符串传输。';
+          input.inputMode='decimal';hint.textContent='最小值 '+(q.validation.min_value??'不限')+'，最大值 '+(q.validation.max_value??'不限')+(q.validation.integer_only?'，仅整数':'，可小数')+'。';
           input.oninput=()=>selected=input.value;
         }else{
-          function count(){selected=input.value;hint.textContent='去首尾空白后 '+Array.from(input.value.trim()).length+' 个码点；最少 '+(q.validation.min_length??'不限')+'，最多 '+(q.validation.max_length??'不限')+'。以服务端校验为准。';}
+          function count(){selected=input.value;hint.textContent='字数（不计首尾空白）：'+Array.from(input.value.trim()).length+'；最少 '+(q.validation.min_length??'不限')+'，最多 '+(q.validation.max_length??'不限')+'。';}
           input.oninput=count;count();
         }
       }
@@ -274,7 +272,7 @@ async function fill() {
       const list=el('ul');for(const qid of path)list.append(el('li',questions[qid].title+'：'+displayAnswer(questions[qid],answers[qid])));root.append(list);
       const anonymous=survey.allow_anonymous?field('匿名提交（创建者看不到账号身份）',anonymousChoice,root,'checkbox'):null;
       if(anonymous)anonymous.onchange=()=>anonymousChoice=anonymous.checked;
-      root.append(el('p',survey.allow_repeat?'允许多次填写。刷新后视为一次新填写；结果未知时请先重试原提交。':'每个账号只能有效提交一份。'));
+      root.append(el('p',survey.allow_repeat?'允许多次填写。提交结果未知时，请先重试原提交。':'每个账号只能有效提交一份。'));
       button('返回修改',()=>goBack(path[path.length-1]));
       for(const qid of path)button('修改：'+questions[qid].title,()=>goBack(qid));
       const submit=button('确认提交',async()=>{

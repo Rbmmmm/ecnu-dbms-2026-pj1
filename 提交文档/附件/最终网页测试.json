@@ -1,0 +1,79 @@
+{
+  "run_id": "c121f4f357b148ec9f9572972e7a2b1d",
+  "date": "2026-10-22T15:12:45.664932+00:00",
+  "result": "passed",
+  "suites": {
+    "browser.cjs": {
+      "result": "passed",
+      "checks": {
+        "creator_draft_publish_share": "passed",
+        "confirmation_does_not_save": "passed",
+        "truncated_response_same_content_recovery": "passed",
+        "statistics_zero_options_and_privacy": "passed",
+        "page_identity": "passed",
+        "not_blank": "passed",
+        "no_framework_overlay": "passed",
+        "mobile_no_horizontal_overflow": "passed",
+        "console_health": "passed"
+      },
+      "exit_code": 0
+    },
+    "browser_w007.cjs": {
+      "result": "passed",
+      "checks": {
+        "editor_all_types_constraints_rules": "passed",
+        "backtrack_pending_reuse_and_error_preservation": "passed",
+        "old_evaluation_discarded_and_end_not_submitted": "passed",
+        "end_clear_and_no_resurrection": "passed",
+        "first_matching_rule_and_explicit_submission": "passed",
+        "unicode_input_not_utf16_truncated": "passed",
+        "page_identity_console_and_mobile": "passed"
+      },
+      "exit_code": 0
+    },
+    "browser_w008.cjs": {
+      "result": "passed",
+      "checks": {
+        "f01_all_types_counts_and_paginated_anonymous_contents": "passed",
+        "r5_refresh_whole_and_single_statistics": "passed",
+        "beijing_deadline_clear_close_and_retry": "passed",
+        "literal_html_anonymous_whitelist_safe_login_console_mobile": "passed"
+      },
+      "exit_code": 0
+    },
+    "browser_p4.cjs": {
+      "result": "passed",
+      "checks": {
+        "unicode_password_register_login": "passed",
+        "own_list_pagination_desktop_mobile": "passed",
+        "anonymous_choice_survives_backtracking": "passed",
+        "page_console_health": "passed"
+      },
+      "exit_code": 0
+    }
+  },
+  "checks": {
+    "application_restart": "passed",
+    "database_cleanup": "passed"
+  },
+  "database": "survey_test_c121f4f357b148ec9f9572972e7a2b1d",
+  "origin": "http://127.0.0.1:62090",
+  "collections": {
+    "survey_users": {
+      "count": 11,
+      "sha256": "e490dcaae72bfc3927dea503420a98551bd06c6aec8e0be064c0ec6fa8e66c56"
+    },
+    "survey_surveys": {
+      "count": 29,
+      "sha256": "35d315dcaa05d0840b0f791615f67b56cdd6b77267110f4d40ce1851e833c758"
+    },
+    "survey_responses": {
+      "count": 10,
+      "sha256": "2c67204901af403a42b07696f1d22c12d3be0e0e84360f8e1942c48f4cb7dd58"
+    },
+    "survey_sessions": {
+      "count": 11,
+      "sha256": "0263383f8c085e1b60355c8aa90e494cc0647a6beca7f58fe9a5a9ae94d45fd1"
+    }
+  }
+}
