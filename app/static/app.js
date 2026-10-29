@@ -118,7 +118,7 @@ function selectField(label, choices, value, parent) {
 }
 async function edit() {
   let survey=await api('/surveys/'+sid);
-  let pendingImport=null;
+  let pendingImport=null,pendingImportAction=null,importInFlight=false;
   const available=[];
   for(const scope of ['owned','shared'])for(const family of await allItems('/questions?scope='+scope)){
     for(const version of await allItems('/questions/'+family.id+'/versions'))if(version.state==='sealed')available.push({family,version});
@@ -128,7 +128,7 @@ async function edit() {
   let deadlineRaw=shanghaiInput(survey.deadline_at),deadlineInput;
   function editorState(){return JSON.stringify([survey.title,survey.description,survey.allow_anonymous,survey.allow_repeat,deadlineRaw,survey.questions]);}
   let persisted=editorState();
-  function requireSaved(){if(editorState()!==persisted)throw new Error('请先保存草稿，再更换来源或设置授权。');return survey;}
+  function requireSaved(){if(editorState()!==persisted)throw new Error('请先保存草稿，再选入题目、更换来源或设置授权。');return survey;}
   const kinds=[['single','单选'],['multiple','多选'],['text','文本'],['number','数字']];
   function render() {
     clear();root.append(el('h1','编辑问卷'));
@@ -146,18 +146,22 @@ async function edit() {
       sourceBox.append(el('h2','选用常用题'),el('p','选入会保存确切版本的副本。题目所有者可查看问卷ID、标题、状态、版本和实例数。'));
       const sourceSelect=selectField('已有题目版本',available.map((x,i)=>[String(i),x.family.label+' · v'+x.version.version_no+' · '+x.version.payload.title]),'0',sourceBox);
       button('选入题目',async()=>{
-        if(!pendingImport){const chosen=available[Number(sourceSelect.value)];await save();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:chosen.family.id,question_version_id:chosen.version.id};render();}
-        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;persisted=editorState();render();}
-        catch(e){if(!e.unknown){pendingImport=null;persisted=editorState();render();}throw e;}
+        if(importInFlight)return;
+        if(!pendingImport){const chosen=available[Number(sourceSelect.value)];requireSaved();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:chosen.family.id,question_version_id:chosen.version.id};pendingImportAction='选入题目';}
+        importInFlight=true;render();
+        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;pendingImportAction=null;importInFlight=false;persisted=editorState();render();}
+        catch(e){importInFlight=false;if(!e.unknown){pendingImport=null;pendingImportAction=null;persisted=editorState();}render();throw e;}
       },sourceBox);
     }
     if(bankChoices.length){
       const box=el('section',undefined,{class:'card'});root.append(box);
       const choice=selectField('从题库选用默认版',bankChoices.map((x,i)=>[String(i),x.bank.title+' · '+x.entry.label+' · v'+x.entry.version_no]),'0',box);
       button('从题库选入',async()=>{
-        if(!pendingImport){const x=bankChoices[Number(choice.value)].entry;await save();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:x.question_id,question_version_id:x.default_version_id};render();}
-        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;persisted=editorState();render();}
-        catch(e){if(!e.unknown){pendingImport=null;persisted=editorState();render();}throw e;}
+        if(importInFlight)return;
+        if(!pendingImport){const x=bankChoices[Number(choice.value)].entry;requireSaved();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:x.question_id,question_version_id:x.default_version_id};pendingImportAction='从题库选入';}
+        importInFlight=true;render();
+        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;pendingImportAction=null;importInFlight=false;persisted=editorState();render();}
+        catch(e){importInFlight=false;if(!e.unknown){pendingImport=null;pendingImportAction=null;persisted=editorState();}render();throw e;}
       },box);
     }
     grantControls(survey,root,async()=>requireSaved(),async updated=>{survey=updated;persisted=editorState();render();});
@@ -226,7 +230,7 @@ async function edit() {
     for(const [kind,label] of kinds)button('添加'+label+'题',()=>{survey.questions.push(newQuestion(kind));render();}).disabled=survey.questions.length>=LIMITS.questions;
     button('保存草稿',async()=>{await save();document.querySelector('#notice').textContent='草稿已保存；待修复项：'+survey.publish_issues.map(v=>{const index=survey.questions.findIndex(q=>q.id===v.question_id);return(index>=0?'第'+(index+1)+'题：':'')+v.message;}).join('；');},root,true);
     button('发布问卷',async()=>{await save();await api('/surveys/'+sid+'/publish','POST',{revision:survey.revision});location.href='/surveys/'+sid+'/manage';},root,true);
-    if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(!['选入题目','从题库选入'].includes(control.textContent))control.disabled=true;
+    if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(importInFlight||control.textContent!==pendingImportAction)control.disabled=true;
   }
   async function save(renderAfter=true){
     survey.deadline_at=deadlineUTC(deadlineInput);
@@ -514,9 +518,21 @@ async function catalog(){
   const content=el('fieldset');content.addEventListener('input',()=>{versionDirty=true;});content.append(el('legend','版本内容'));area.append(content);
   const title=field('题干',value.title,content);title.oninput=()=>value.title=title.value;
   const required=field('必须回答',value.required,content,'checkbox');required.onchange=()=>value.required=required.checked;
-  value.options.forEach((o,i)=>{const input=field('选项 '+(i+1),o.text,content);input.oninput=()=>o.text=input.value;});
-  if(['single','multiple'].includes(value.kind)&&selected.state==='draft')button('添加选项',()=>{value.options.push({id:crypto.randomUUID(),text:''});versionDirty=true;renderOptions();},content);
-  function renderOptions(){const o=value.options.at(-1);const input=field('选项 '+value.options.length,o.text,content);input.oninput=()=>o.text=input.value;}
+  const optionsBox=el('section');content.append(optionsBox);
+  function renderOptions(){
+    optionsBox.replaceChildren();
+    value.options.forEach((o,i)=>{
+      const row=el('div',undefined,{class:'row'});optionsBox.append(row);
+      const input=field('选项 '+(i+1),o.text,row);input.oninput=()=>o.text=input.value;
+      if(selected.state==='draft'){
+        button('上移选项',()=>{move(value.options,i,-1);versionDirty=true;renderOptions();},row).disabled=i===0;
+        button('下移选项',()=>{move(value.options,i,1);versionDirty=true;renderOptions();},row).disabled=i===value.options.length-1;
+        button('删除选项',()=>{value.options.splice(i,1);versionDirty=true;renderOptions();},row);
+      }
+    });
+    if(['single','multiple'].includes(value.kind)&&selected.state==='draft')button('添加选项',()=>{value.options.push({id:crypto.randomUUID(),text:''});versionDirty=true;renderOptions();},optionsBox).disabled=value.options.length>=LIMITS.options;
+  }
+  renderOptions();
   const limits={multiple:[['min_choices','最少选择数'],['max_choices','最多选择数']],text:[['min_length','最少字数'],['max_length','最多字数']],number:[['min_value','最小值'],['max_value','最大值']]}[value.kind]??[];
   for(const [key,text] of limits){const input=field(text,value.validation[key],content);input.oninput=()=>value.validation[key]=input.value===''?null:value.kind==='number'?input.value:/^\d{1,5}$/.test(input.value)?Number(input.value):input.value;}
   if(value.kind==='number'){const input=field('仅允许整数',value.validation.integer_only,content,'checkbox');input.onchange=()=>value.validation.integer_only=input.checked;}

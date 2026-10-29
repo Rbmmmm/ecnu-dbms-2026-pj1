@@ -127,6 +127,9 @@ def upgrade(db, journal_path, fail_after=None):
         temporary.replace(journal_path)
 
     try:
+        if (resumed and not backup.exists() and
+                (journal.get('steps') or any('before' in item for item in journal['attempts']))):
+            raise RuntimeError('upgrade backup missing; restore the original backup before resuming')
         if resumed and backup.exists():
             verify_journal_structure(db, journal)
         attempt['contract_before'] = preflight(db, allow_intermediate=resumed and backup.exists())

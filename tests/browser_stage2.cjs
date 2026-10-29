@@ -55,6 +55,7 @@ const report={checks:{},console:[],screenshots:[],viewport:{desktop:[1280,900],m
    await a.goto(base+'/surveys');await a.getByRole('button',{name:'创建问卷',exact:true}).click();await a.waitForURL('**/edit');
    const sid=new URL(a.url()).pathname.split('/')[2];report.survey_ids.push(sid);
    await a.getByLabel('问卷标题',{exact:true}).fill('复用年龄 '+(i+1));await a.getByLabel('允许匿名填写',{exact:true}).check();
+   await a.getByRole('button',{name:'保存草稿',exact:true}).click();await a.getByRole('status').filter({hasText:'草稿已保存'}).waitFor();
    await a.getByLabel('已有题目版本',{exact:true}).selectOption({label:'常用年龄 · v1 · 你的年龄'});
    if(i===0)await a.route('**/question-imports',async route=>{if(!importLost){importLost=true;importBody=route.request().postDataJSON();const r=await route.fetch();assert.equal(r.status(),200);await route.fulfill({response:r,body:'{'});}else{retryBody=route.request().postDataJSON();await route.continue();}});
    await a.getByRole('button',{name:'选入题目',exact:true}).click();

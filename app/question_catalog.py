@@ -133,6 +133,8 @@ def save_version(db, qid, vid, uid, revision, value, time, seal=False):
     if (not seal and doc['state'] == 'draft' and doc['revision'] == revision + 1
             and wire(doc['payload']) == wire(value)):
         return doc
+    if doc['revision'] != revision:
+        raise Problem(409, 'REVISION_OR_STATE_CONFLICT', '状态或版本已改变，请刷新后重试')
     if revision == LIMITS['revision']:
         raise Problem(409, 'REVISION_LIMIT', '版本已达上限')
     changes = {'payload': value, 'updated_at': time}

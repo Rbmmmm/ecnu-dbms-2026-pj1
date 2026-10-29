@@ -191,6 +191,8 @@ def create_app(settings=None):
         return value
 
     def update(database, survey, revision, changes, required_state):
+        if survey['revision'] != revision:
+            raise Problem(409, 'REVISION_OR_STATE_CONFLICT', '状态或版本已改变，请刷新后重试')
         if revision == LIMITS['revision']:
             raise Problem(409, 'REVISION_LIMIT', '问卷管理版本已达上限')
         updated = database.survey_surveys.find_one_and_update(

@@ -79,7 +79,7 @@ def test_T2_10_archived_copy_explicit_upgrade_and_legacy_http(old_copy, tmp_path
         assert 'question_result_grants' not in result.json()
         db.survey_surveys.delete_one({'_id': ObjectId(result.json()['id'])})
         # Same old endpoint fields and constraints; only Question.source is added.
-        old_api = json.loads((ROOT / '开发文档/证据/P6-技术运行/v1-restored/openapi-v1.json').read_text())
+        old_api = json.loads((ROOT / '提交文档/附件/openapi-v1.json').read_text())
         new_api = owner.get('/openapi.json').json()
         allowed = {'/api/v1/questions', '/api/v1/questions/{qid}', '/api/v1/questions/{qid}/versions',
             '/api/v1/questions/{qid}/versions/{vid}', '/api/v1/questions/{qid}/versions/{vid}/draft',

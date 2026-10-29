@@ -38,7 +38,7 @@ const report={checks:{},console:[],screenshots:[],versions:[],surveys:[],viewpor
   await b.locator('#bank-editor').waitFor();const bid=new URL(b.url()).searchParams.get('bank');report.bank_id=bid;
   await b.getByRole('button',{name:'加入题库',exact:true}).click();await b.getByRole('heading',{name:'共享年龄 · 默认 v1',exact:true}).waitFor();
   await shot(b,'management-bank-v1-mobile.png');report.checks.bank_creation_add_and_explicit_default='passed';
-  async function createFromBank(title){await b.goto(base+'/surveys');await b.getByRole('button',{name:'创建问卷',exact:true}).click();await b.waitForURL('**/edit');const sid=new URL(b.url()).pathname.split('/')[2];await b.getByLabel('问卷标题',{exact:true}).fill(title);await b.getByLabel('允许匿名填写',{exact:true}).check();await b.getByRole('button',{name:'从题库选入',exact:true}).click();await b.locator('fieldset[data-kind="number"]').waitFor();return sid;}
+  async function createFromBank(title){await b.goto(base+'/surveys');await b.getByRole('button',{name:'创建问卷',exact:true}).click();await b.waitForURL('**/edit');const sid=new URL(b.url()).pathname.split('/')[2];await b.getByLabel('问卷标题',{exact:true}).fill(title);await b.getByLabel('允许匿名填写',{exact:true}).check();await b.getByRole('button',{name:'保存草稿',exact:true}).click();await b.getByRole('status').filter({hasText:'草稿已保存'}).waitFor();await b.getByRole('button',{name:'从题库选入',exact:true}).click();await b.locator('fieldset[data-kind="number"]').waitFor();return sid;}
   const sid=await createFromBank('乙的旧年龄卷');report.surveys.push(sid);
   await b.getByRole('button',{name:'从题库选入',exact:true}).click();await b.locator('fieldset[data-kind="number"]').nth(1).waitFor();
   await b.getByLabel('允许向题目所有者提供汇总：你的年龄',{exact:true}).check();await b.getByRole('button',{name:'保存本家族授权',exact:true}).click();await b.getByText('你的年龄：已开启',{exact:true}).waitFor();
@@ -61,7 +61,7 @@ const report={checks:{},console:[],screenshots:[],versions:[],surveys:[],viewpor
   await b.getByLabel('问卷标题',{exact:true}).fill('先保存再换版');
   let implicitSaves=0;const countSave=request=>{if(request.url().endsWith('/draft')&&request.method()==='PUT')implicitSaves++;};b.on('request',countSave);
   await b.getByRole('button',{name:'换用版本并清空本题规则',exact:true}).click();await b.getByRole('alert').filter({hasText:'请先保存草稿'}).waitFor();assert.equal(implicitSaves,0);assert.equal(await b.getByLabel('问卷标题',{exact:true}).inputValue(),'先保存再换版');b.off('request',countSave);report.checks.unsaved_survey_guard_has_no_implicit_write='passed';
-  await b.getByRole('button',{name:'添加规则',exact:true}).click();await b.getByRole('button',{name:'保存草稿',exact:true}).click();await b.getByRole('status').filter({hasText:'草稿已保存'}).waitFor();
+  await b.getByRole('button',{name:'添加规则',exact:true}).click();const saveControl=await b.getByRole('button',{name:'保存草稿',exact:true}).elementHandle();await saveControl.click();await b.waitForFunction(node=>!node.isConnected,saveControl);await b.getByRole('status').filter({hasText:'草稿已保存'}).waitFor();
   const initial=await api(b,'/surveys/'+next),iid=initial.questions[0].id;
   await b.getByLabel('换用同家族版本',{exact:true}).selectOption(report.versions[0]);
   await loseOnce(b,'**/source','PUT',()=>b.getByRole('button',{name:'换用版本并清空本题规则',exact:true}).click(),()=>b.getByRole('button',{name:'换用版本并清空本题规则',exact:true}).click(),async()=>assert.equal(await b.getByLabel('问卷标题',{exact:true}).isDisabled(),true));
@@ -79,6 +79,6 @@ const report={checks:{},console:[],screenshots:[],versions:[],surveys:[],viewpor
   report.checks.usage_minimum_revoked_history_exact_source_bank_remove_and_grant_revoke='passed';
   for(const p of[a,b,c]){assert.equal(await p.title(),'MongoDB 问卷系统');assert.ok((await p.locator('main').innerText()).length>20);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await p.locator('vite-error-overlay,nextjs-portal').count(),0);}
   assert.deepEqual(errors,[]);assert.ok(report.console.every(x=>/Failed to load resource: the server responded with a status of (404|409|422)/.test(x.text)),JSON.stringify(report.console));report.checks.identity_nonblank_overlay_console_responsive='passed';
- }catch(e){report.failure=e.stack;throw e;}
+ }catch(e){report.failure=e.stack;report.pages=[];for(const context of browser.contexts())for(const p of context.pages())report.pages.push({url:p.url(),text:await p.locator('main').innerText(),inputs:await p.locator('main input,main select').evaluateAll(nodes=>nodes.map(x=>({tag:x.tagName,type:x.type,value:x.value,disabled:x.disabled})))});throw e;}
  finally{await browser.close();fs.writeFileSync(path.join(output,'browser-management.json'),JSON.stringify(report,null,2));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
