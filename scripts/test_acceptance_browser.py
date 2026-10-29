@@ -45,6 +45,18 @@ def main():
                    'SURVEY_TEST_ORIGIN': origin, 'SURVEY_EVIDENCE_DIR': str(output)}
             with (output / 'server.log').open('w') as log:
                 process = start(env, port, log)
+                with (output / 'editor-save.log').open('w') as browser_log:
+                    done = subprocess.run([env['SURVEY_NODE'], str(ROOT / 'tests/browser_editor_save.cjs')],
+                        cwd=ROOT, env=env, stdout=browser_log, stderr=subprocess.STDOUT, timeout=180)
+                assert done.returncode == 0, 'editor save/publish browser failed; see editor-save.log'
+                editor = json.loads((output / 'browser-editor-save.json').read_text()); report['editor'] = editor
+                assert editor['checks'] and all(x == 'passed' for x in editor['checks'].values())
+                for expected in editor['surveys']:
+                    survey = mongo[name].survey_surveys.find_one({'_id': ObjectId(expected['id'])})
+                    assert survey['title'] == expected['title'] and survey['state'] == expected['state']
+                    assert survey['questions'][0]['title'] == expected['question_title']
+                    assert survey['schema_version'] == expected['schema_version']
+                report['checks']['editor_save_publish_real_bson'] = 'passed'
                 with (output / 'browser.log').open('w') as browser_log:
                     done = subprocess.run([env['SURVEY_NODE'], str(ROOT / 'tests/browser_acceptance.cjs')],
                         cwd=ROOT, env=env, stdout=browser_log, stderr=subprocess.STDOUT, timeout=300)

@@ -119,6 +119,7 @@ function selectField(label, choices, value, parent) {
 async function edit() {
   let survey=await api('/surveys/'+sid);
   let pendingImport=null,pendingImportAction=null,importInFlight=false;
+  let saving=false;
   const available=[];
   for(const scope of ['owned','shared'])for(const family of await allItems('/questions?scope='+scope)){
     for(const version of await allItems('/questions/'+family.id+'/versions'))if(version.state==='sealed')available.push({family,version});
@@ -229,13 +230,23 @@ async function edit() {
     });
     for(const [kind,label] of kinds)button('添加'+label+'题',()=>{survey.questions.push(newQuestion(kind));render();}).disabled=survey.questions.length>=LIMITS.questions;
     button('保存草稿',async()=>{await save();document.querySelector('#notice').textContent='草稿已保存；待修复项：'+survey.publish_issues.map(v=>{const index=survey.questions.findIndex(q=>q.id===v.question_id);return(index>=0?'第'+(index+1)+'题：':'')+v.message;}).join('；');},root,true);
-    button('发布问卷',async()=>{await save();await api('/surveys/'+sid+'/publish','POST',{revision:survey.revision});location.href='/surveys/'+sid+'/manage';},root,true);
+    button('发布问卷',()=>save(true),root,true);
     if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(importInFlight||control.textContent!==pendingImportAction)control.disabled=true;
   }
-  async function save(renderAfter=true){
-    survey.deadline_at=deadlineUTC(deadlineInput);
-    const body=Object.fromEntries(['revision','title','description','allow_anonymous','allow_repeat','deadline_at','questions'].map(k=>[k,survey[k]]));
-    survey=await api('/surveys/'+sid+'/draft','PUT',body);deadlineRaw=shanghaiInput(survey.deadline_at);persisted=editorState();if(renderAfter)render();
+  async function save(publish=false){
+    if(saving)return;
+    document.querySelector('#notice').textContent='';
+    const deadline=deadlineUTC(deadlineInput);
+    saving=true;
+    const release=lockControls();let saved=false;
+    try{
+      survey.deadline_at=deadline;
+      const body=Object.fromEntries(['revision','title','description','allow_anonymous','allow_repeat','deadline_at','questions'].map(k=>[k,survey[k]]));
+      survey=await api('/surveys/'+sid+'/draft','PUT',body);deadlineRaw=shanghaiInput(survey.deadline_at);persisted=editorState();saved=true;
+      if(publish){survey=await api('/surveys/'+sid+'/publish','POST',{revision:survey.revision});location.href='/surveys/'+sid+'/manage';}
+    }finally{
+      saving=false;release();if(saved)render();
+    }
   }
   render();
 }
