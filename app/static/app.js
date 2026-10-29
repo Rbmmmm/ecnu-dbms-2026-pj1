@@ -118,6 +118,9 @@ function selectField(label, choices, value, parent) {
 }
 async function edit() {
   let survey=await api('/surveys/'+sid);
+  let pendingImport=null;
+  const available=[];
+  for(let offset=0;;offset+=100){const rows=await api('/questions?limit=100&offset='+offset);for(const family of rows.items){for(let vo=0;;vo+=100){const versions=await api('/questions/'+family.id+'/versions?limit=100&offset='+vo);available.push(...versions.items.filter(v=>v.state==='sealed').map(v=>({family,version:v})));if(vo+100>=versions.total)break;}}if(offset+100>=rows.total)break;}
   let deadlineRaw=shanghaiInput(survey.deadline_at),deadlineInput;
   const kinds=[['single','单选'],['multiple','多选'],['text','文本'],['number','数字']];
   function render() {
@@ -131,8 +134,19 @@ async function edit() {
       const input=field(label,survey[key],config,'checkbox');input.onchange=()=>survey[key]=input.checked;
     }
     deadlineInput=field('截止时间（北京时间，可留空）',deadlineRaw,config,'datetime-local');deadlineInput.step='0.001';deadlineInput.oninput=()=>deadlineRaw=deadlineInput.value;
+    if(available.length){
+      const sourceBox=el('section',undefined,{class:'card'});root.append(sourceBox);
+      sourceBox.append(el('h2','选用常用题'),el('p','选入会保存确切版本的副本。题目所有者可查看问卷ID、标题、状态、版本和实例数。'));
+      const sourceSelect=selectField('已有题目版本',available.map((x,i)=>[String(i),x.family.label+' · v'+x.version.version_no+' · '+x.version.payload.title]),'0',sourceBox);
+      button('选入题目',async()=>{
+        if(!pendingImport){const chosen=available[Number(sourceSelect.value)];await save();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:chosen.family.id,question_version_id:chosen.version.id};render();}
+        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;render();}
+        catch(e){if(!e.unknown){pendingImport=null;render();}throw e;}
+      },sourceBox);
+    }
     survey.questions.forEach((q,index)=>{
       const card=el('fieldset',undefined,{'data-question-id':q.id,'data-kind':q.kind});card.append(el('legend','第 '+(index+1)+' 题'));root.append(card);
+      if(q.source){card.append(el('p','来源版本：'+q.source.question_version_id+'。内容已定稿；修改题意请到我的题目派生新版。'));}
       const kind=selectField('题型',kinds,q.kind,card);
       kind.onchange=()=>{const fresh=newQuestion(kind.value);Object.assign(q,{kind:fresh.kind,validation:fresh.validation,options:fresh.options,rules:[]});render();};
       const title=field('题干',q.title,card);title.oninput=()=>q.title=title.value;
@@ -154,6 +168,9 @@ async function edit() {
       if(q.kind==='text')card.append(el('p','字数不计首尾空白，部分表情会计作多个字符。',{class:'muted'}));
       if(q.kind==='number'){
         const integer=field('仅允许整数',q.validation.integer_only,card,'checkbox');integer.onchange=()=>q.validation.integer_only=integer.checked;
+      }
+      if(q.source){
+        for(const control of card.querySelectorAll('input,select,button'))control.disabled=true;
       }
       if(q.kind==='text'&&q.rules.length)button('清除不适用规则',()=>{q.rules=[];render();},card);
       if(q.kind!=='text'){
@@ -182,6 +199,7 @@ async function edit() {
     for(const [kind,label] of kinds)button('添加'+label+'题',()=>{survey.questions.push(newQuestion(kind));render();}).disabled=survey.questions.length>=LIMITS.questions;
     button('保存草稿',async()=>{await save();document.querySelector('#notice').textContent='草稿已保存；待修复项：'+survey.publish_issues.map(v=>{const index=survey.questions.findIndex(q=>q.id===v.question_id);return(index>=0?'第'+(index+1)+'题：':'')+v.message;}).join('；');},root,true);
     button('发布问卷',async()=>{await save();await api('/surveys/'+sid+'/publish','POST',{revision:survey.revision});location.href='/surveys/'+sid+'/manage';},root,true);
+    if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(control.textContent!=='选入题目')control.disabled=true;
   }
   async function save(){
     survey.deadline_at=deadlineUTC(deadlineInput);
@@ -216,7 +234,9 @@ async function fill() {
   const survey=await api('/fill/'+sid);
   let answers={},key=crypto.randomUUID(),path=[survey.questions[0].id],shown=survey.questions[0].id,frozenBody=null,anonymousChoice=false;
   const questions=Object.fromEntries(survey.questions.map(q=>[q.id,q]));
-  function heading(){clear();root.append(el('h1',survey.title),el('p',survey.description));}
+  function heading(){clear();root.append(el('h1',survey.title),el('p',survey.description));
+    if(survey.result_sharing_notice?.enabled)root.append(el('p','部分题目的汇总结果将提供给题目所有者，不包含账号身份或逐条内容。'));
+  }
   if(!survey.accepting||(!survey.allow_repeat&&survey.already_submitted)){
     heading();root.append(el('p',!survey.accepting?'问卷已关闭或截止。':'此账号已完成填写。'));return;
   }
@@ -327,6 +347,67 @@ async function loadContents(q,box,offset,limit){
     const account=await api('/auth/me'); document.querySelector('#account').textContent=account.username;
     const logout=document.querySelector('#logout'); logout.hidden=false;
     logout.onclick=async()=>{try{await api('/auth/logout','POST',{});location.href='/login';}catch(e){fail(e);}};
-    await ({list,edit,manage,fill,statistics:stats}[page])();
+    await ({list,edit,manage,fill,catalog,statistics:stats}[page])();
   } catch(e) {root.replaceChildren(el('h1','暂时无法打开页面'));fail(e);}
 })();
+
+async function catalog(){
+  const families=[];
+  for(let offset=0;;offset+=100){const rows=await api('/questions?offset='+offset+'&limit=100');families.push(...rows.items);if(offset+100>=rows.total)break;}
+  clear();root.append(el('h1','我的题目'));
+  const createBox=el('section',undefined,{class:'card'});root.append(createBox);
+  const label=field('题目标签','',createBox);
+  const kind=selectField('新题类型',[['single','单选'],['multiple','多选'],['text','文本'],['number','数字']],'number',createBox);
+  const familyKey=crypto.randomUUID(),versionKey=crypto.randomUUID();
+  let pendingCreate=null;
+  button('创建常用题',async()=>{
+    if(!pendingCreate){const fresh=newQuestion(kind.value);delete fresh.id;delete fresh.rules;pendingCreate={family:{label:label.value,creation_key:familyKey},version:{creation_key:versionKey,payload:fresh}};}
+    label.disabled=true;kind.disabled=true;
+    try{
+      const family=await api('/questions','POST',pendingCreate.family);
+      const version=await api('/questions/'+family.id+'/versions','POST',pendingCreate.version);
+      location.href='/questions?question='+family.id+'&version='+version.id;
+    }catch(e){if(!e.unknown){pendingCreate=null;label.disabled=false;kind.disabled=false;}throw e;}
+  },createBox,true);
+  for(const family of families){
+    const box=el('section',undefined,{class:'card'});root.append(box);
+    box.append(el('h2',family.label));
+    link('打开题目','/questions?question='+family.id,box);
+  }
+  const params=new URLSearchParams(location.search),qid=params.get('question');
+  if(!qid)return;
+  const family=await api('/questions/'+qid),versions=[];
+  for(let offset=0;;offset+=100){const rows=await api('/questions/'+qid+'/versions?offset='+offset+'&limit=100');versions.push(...rows.items);if(offset+100>=rows.total)break;}
+  const selected=versions.find(v=>v.id===params.get('version'))??versions[0];
+  if(!selected)return;
+  const area=el('section',undefined,{class:'card',id:'version-editor'});root.append(area);
+  area.append(el('h2',family.label+' · v'+selected.version_no+' · '+(selected.state==='sealed'?'已定稿':'草稿')));
+  for(const version of versions)link('v'+version.version_no+' '+(version.state==='sealed'?'已定稿':'草稿'),'/questions?question='+qid+'&version='+version.id,area);
+  const value=structuredClone(selected.payload);
+  const content=el('fieldset');content.append(el('legend','版本内容'));area.append(content);
+  const title=field('题干',value.title,content);title.oninput=()=>value.title=title.value;
+  const required=field('必须回答',value.required,content,'checkbox');required.onchange=()=>value.required=required.checked;
+  value.options.forEach((o,i)=>{const input=field('选项 '+(i+1),o.text,content);input.oninput=()=>o.text=input.value;});
+  if(['single','multiple'].includes(value.kind)&&selected.state==='draft')button('添加选项',()=>{value.options.push({id:crypto.randomUUID(),text:''});renderOptions();},content);
+  function renderOptions(){const o=value.options.at(-1);const input=field('选项 '+value.options.length,o.text,content);input.oninput=()=>o.text=input.value;}
+  const limits={multiple:[['min_choices','最少选择数'],['max_choices','最多选择数']],text:[['min_length','最少字数'],['max_length','最多字数']],number:[['min_value','最小值'],['max_value','最大值']]}[value.kind]??[];
+  for(const [key,text] of limits){const input=field(text,value.validation[key],content);input.oninput=()=>value.validation[key]=input.value===''?null:value.kind==='number'?input.value:/^\d{1,5}$/.test(input.value)?Number(input.value):input.value;}
+  if(value.kind==='number'){const input=field('仅允许整数',value.validation.integer_only,content,'checkbox');input.onchange=()=>value.validation.integer_only=input.checked;}
+  if(selected.parent_version_id)area.append(el('p','派生来源：'+selected.parent_version_id));
+  if(selected.state==='sealed'){
+    for(const control of content.querySelectorAll('input,button'))control.disabled=true;
+    const key=crypto.randomUUID();
+    button('派生新版',async()=>{const result=await api('/questions/'+qid+'/versions','POST',{creation_key:key,operation:'derive',parent_version_id:selected.id});location.href='/questions?question='+qid+'&version='+result.id;},area,true);
+    link('创建问卷并选入','/surveys',area);
+  }else{
+    let revision=selected.revision,pendingSeal=null;
+    async function save(){const result=await api('/questions/'+qid+'/versions/'+selected.id+'/draft','PUT',{revision,payload:value});revision=result.revision;return result;}
+    const saveButton=button('保存题目草稿',async()=>{const result=await save();document.querySelector('#notice').textContent='题目草稿已保存'+(result.seal_issues.length?'；'+result.seal_issues.map(x=>x.message).join('；'):'');},area,true);
+    button('定稿版本',async()=>{
+      try{
+        if(!pendingSeal){await save();pendingSeal={revision};content.disabled=true;saveButton.disabled=true;}
+        await api('/questions/'+qid+'/versions/'+selected.id+'/seal','POST',pendingSeal);await catalog();
+      }catch(e){if(!e.unknown){pendingSeal=null;content.disabled=false;saveButton.disabled=false;}throw e;}
+    },area,true);
+  }
+}

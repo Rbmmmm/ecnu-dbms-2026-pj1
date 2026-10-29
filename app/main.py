@@ -5,6 +5,8 @@ import hashlib
 import json
 import re
 import secrets
+from typing import Literal
+from copy import deepcopy
 
 from bson import ObjectId, BSON
 from bson.decimal128 import Decimal128
@@ -24,6 +26,8 @@ from app.db import connect, initialize, inspect_contract
 from app.domain import Problem, publish_issues, replay
 from app.schemas import Credentials, SurveyCreate, Draft, Revision, Evaluate, Submission, LoginCredentials, DeadlineChange
 from app.statistics import statistics, contents
+from app import question_catalog as catalog
+from app.schemas import QuestionCreate, VersionCreate, VersionDraft, QuestionImport
 
 COOKIE = 'survey_session'
 PASSWORD = PasswordHash.recommended()
@@ -196,7 +200,7 @@ def create_app(settings=None):
             inspect_contract(database)
         except RuntimeError:
             raise Problem(503, 'SCHEMA_NOT_READY', '数据库契约检查失败')
-        return {'status': 'ready', 'stage': 'P4', 'work_package': 'W-009', 'schema_version': 1}
+        return {'status': 'ready', 'stage': 'II-P2', 'work_package': 'II-W003', 'schema_version': 2}
 
     @app.post('/api/v1/auth/register', status_code=201)
     def register(body: Credentials, request: Request, database=Depends(db)):
@@ -266,7 +270,12 @@ def create_app(settings=None):
         survey = owned(database, sid, account)
         deadline(body.deadline_at, server_time(request))
         changes = body.model_dump(exclude={'revision'})
-        changes['questions'] = questions_to_bson(changes['questions'])
+        for question in changes['questions']:
+            if question.get('source') is None:
+                question.pop('source', None)
+        changes['questions'] = catalog.protect_draft(database, survey, questions_to_bson(changes['questions']))
+        if survey['schema_version'] == 2:
+            changes['question_result_grants'] = catalog.remaining_grants(survey, changes['questions'])
         changes['updated_at'] = server_time(request)
         if len(BSON.encode({**survey, **changes})) > LIMITS['document_bytes']:
             raise Problem(413, 'DOCUMENT_TOO_LARGE', '文档不能超过8MiB')
@@ -282,10 +291,16 @@ def create_app(settings=None):
         issues = publish_issues(public(survey))
         if issues:
             raise Problem(422, 'INVALID_CONFIGURATION', '请修复问卷后发布', issues)
+        for question in survey['questions']:
+            if 'source' in question:
+                catalog.validate_source(database, question)
         time = server_time(request)
         deadline(survey['deadline_at'], time)
-        return update(database, survey, body.revision, {'state': 'published', 'content_version': 1,
-                      'published_at': time, 'updated_at': time}, 'draft')
+        changes = {'state': 'published', 'content_version': 1, 'published_at': time, 'updated_at': time}
+        if survey['schema_version'] == 2:
+            changes['question_result_grants'] = [{**g, 'allowed_at_publish': g['enabled']}
+                for g in catalog.remaining_grants(survey, survey['questions'])]
+        return update(database, survey, body.revision, changes, 'draft')
 
     @app.patch('/api/v1/surveys/{sid}/deadline')
     def change_deadline(sid: str, body: DeadlineChange, request: Request, account=Depends(user), database=Depends(db)):
@@ -308,11 +323,18 @@ def create_app(settings=None):
         survey = fill_survey(database, sid)
         time = server_time(request)
         accepting = survey['state'] == 'published' and (survey['deadline_at'] is None or time < survey['deadline_at'])
-        return {'id': sid, 'title': survey['title'], 'description': survey['description'],
-                'questions': public(survey['questions']), 'content_version': survey['content_version'],
+        result = {'id': sid, 'title': survey['title'], 'description': survey['description'],
+                'questions': public([{k: q[k] for k in catalog.PUBLIC_QUESTION_FIELDS} for q in survey['questions']]), 'content_version': survey['content_version'],
                 'allow_anonymous': survey['allow_anonymous'], 'allow_repeat': survey['allow_repeat'],
                 'accepting': accepting, 'deadline_at': public(survey['deadline_at']),
                 'already_submitted': database.survey_responses.find_one({'survey_id': survey['_id'], 'respondent_id': account['_id']}, {'_id': 1}) is not None}
+        if survey['schema_version'] == 2:
+            enabled = {g['question_id'] for g in survey['question_result_grants']
+                       if g['enabled'] and g['allowed_at_publish']}
+            result['result_sharing_notice'] = {'enabled': bool(enabled), 'aggregate_only': True,
+                'question_instance_ids': [q['id'] for q in survey['questions']
+                    if q.get('source', {}).get('question_id') in enabled]}
+        return result
 
     @app.post('/api/v1/fill/{sid}/evaluate')
     def evaluate(sid: str, body: Evaluate, account=Depends(user), database=Depends(db)):
@@ -385,6 +407,107 @@ def create_app(settings=None):
             raise Problem(422, 'CONTENTS_NOT_SUPPORTED', '选择题请查看选项统计')
         return contents(database, survey, question, offset, limit)
 
+    def family_view(doc):
+        return public({k: doc[k] for k in ['_id', 'label', 'revision', 'created_at', 'updated_at']}) | {'role': 'owner'}
+
+    def version_view(doc):
+        result = public({k: doc[k] for k in ['_id', 'question_id', 'version_no', 'revision', 'state',
+            'parent_version_id', 'operation', 'restored_from_version_id', 'payload', 'payload_hash',
+            'created_at', 'updated_at', 'sealed_at']})
+        result['seal_issues'] = catalog.issues(doc['payload']) if doc['state'] == 'draft' else []
+        return result
+
+    @app.post('/api/v1/questions')
+    def create_question(body: QuestionCreate, request: Request, response: Response, account=Depends(user), database=Depends(db)):
+        doc, created = catalog.create_family(database, account['_id'], body, server_time(request))
+        response.status_code = 201 if created else 200
+        return family_view(doc)
+
+    @app.get('/api/v1/questions')
+    def questions(scope: Literal['owned'] = 'owned', offset: int = Query(0, ge=0, le=LIMITS['offset']),
+                  limit: int = Query(20, ge=1, le=100), account=Depends(user), database=Depends(db)):
+        query = {'owner_id': account['_id']}
+        rows = database.survey_questions.find(query).sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit)
+        return {'items': [family_view(row) for row in rows], 'total': database.survey_questions.count_documents(query)}
+
+    @app.get('/api/v1/questions/{qid}')
+    def get_question(qid: str, account=Depends(user), database=Depends(db)):
+        return family_view(catalog.family(database, oid(qid), account['_id']))
+
+    @app.post('/api/v1/questions/{qid}/versions')
+    def create_question_version(qid: str, body: VersionCreate, request: Request, response: Response,
+                                account=Depends(user), database=Depends(db)):
+        doc, created = catalog.create_version(database, oid(qid), account['_id'], body, server_time(request))
+        response.status_code = 201 if created else 200
+        return version_view(doc)
+
+    @app.get('/api/v1/questions/{qid}/versions')
+    def question_versions(qid: str, offset: int = Query(0, ge=0, le=LIMITS['offset']),
+                          limit: int = Query(20, ge=1, le=100), account=Depends(user), database=Depends(db)):
+        catalog.family(database, oid(qid), account['_id'])
+        query = {'question_id': oid(qid)}
+        rows = database.survey_question_versions.find(query).sort('version_no', -1).skip(offset).limit(limit)
+        return {'items': [version_view(row) for row in rows], 'total': database.survey_question_versions.count_documents(query)}
+
+    @app.get('/api/v1/questions/{qid}/versions/{vid}')
+    def get_question_version(qid: str, vid: str, account=Depends(user), database=Depends(db)):
+        catalog.family(database, oid(qid), account['_id'])
+        return version_view(catalog.version(database, oid(qid), oid(vid)))
+
+    @app.put('/api/v1/questions/{qid}/versions/{vid}/draft')
+    def save_question_version(qid: str, vid: str, body: VersionDraft, request: Request,
+                              account=Depends(user), database=Depends(db)):
+        return version_view(catalog.save_version(database, oid(qid), oid(vid), account['_id'], body.revision,
+                                                  body.payload.model_dump(), server_time(request)))
+
+    @app.post('/api/v1/questions/{qid}/versions/{vid}/seal')
+    def seal_question_version(qid: str, vid: str, body: Revision, request: Request,
+                              account=Depends(user), database=Depends(db)):
+        return version_view(catalog.save_version(database, oid(qid), oid(vid), account['_id'], body.revision,
+                                                  None, server_time(request), seal=True))
+
+    @app.post('/api/v1/surveys/{sid}/question-imports')
+    def import_question(sid: str, body: QuestionImport, request: Request,
+                        account=Depends(user), database=Depends(db)):
+        survey = owned(database, sid, account)
+        existing = next((q for q in survey['questions'] if q['id'] == body.instance_id), None)
+        if existing is not None:
+            source = existing.get('source', {})
+            if (source.get('question_id') == oid(body.question_id) and
+                    source.get('question_version_id') == oid(body.question_version_id)):
+                return view(survey)
+            raise Problem(409, 'INSTANCE_CONFLICT', '实例ID已用于其他题目或版本')
+        if survey['state'] != 'draft' or body.revision != survey['revision']:
+            raise Problem(409, 'REVISION_OR_STATE_CONFLICT', '状态或版本已改变')
+        if len(survey['questions']) >= LIMITS['questions']:
+            raise Problem(422, 'QUESTION_LIMIT', '问卷题目数量已达上限')
+        catalog.family(database, body.question_id, account['_id'], use=True)
+        source_version = catalog.version(database, body.question_id, body.question_version_id)
+        if source_version['state'] != 'sealed':
+            raise Problem(409, 'VERSION_NOT_SEALED', '请先定稿题目版本')
+        # The last permission read is the admission point for this import.
+        catalog.family(database, body.question_id, account['_id'], use=True)
+        question = {'id': body.instance_id, **deepcopy(source_version['payload']), 'rules': [],
+            'source': {'question_id': oid(body.question_id), 'question_version_id': oid(body.question_version_id),
+                       'payload_hash': source_version['payload_hash']}}
+        catalog.validate_source(database, question)
+        questions = survey['questions'] + [question]
+        changes = {'questions': questions, 'schema_version': 2,
+                   'question_result_grants': catalog.remaining_grants(survey, questions),
+                   'updated_at': server_time(request)}
+        catalog.size_check({**survey, **changes})
+        return update(database, survey, body.revision, changes, 'draft')
+
+    @app.get('/api/v1/surveys/{sid}/questions/{iid}/source')
+    def instance_source(sid: str, iid: str, account=Depends(user), database=Depends(db)):
+        survey = owned(database, sid, account)
+        question = next((q for q in survey['questions'] if q['id'] == iid and 'source' in q), None)
+        if question is None:
+            raise Problem(404, 'NOT_FOUND', '来源不存在')
+        catalog.validate_source(database, question)
+        source = question['source']
+        return version_view(catalog.version(database, source['question_id'], source['question_version_id']))
+
     @app.get('/favicon.ico', include_in_schema=False)
     def favicon():
         return Response(status_code=204)
@@ -400,6 +523,10 @@ def create_app(settings=None):
     @app.get('/login')
     def auth_page(request: Request):
         return page(request, request.url.path[1:])
+
+    @app.get('/questions')
+    def catalog_page(request: Request):
+        return page(request, 'catalog')
 
     @app.get('/surveys')
     def survey_page(request: Request):

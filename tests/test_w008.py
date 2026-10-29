@@ -338,9 +338,12 @@ def test_T13_resources_and_startup_contract_failures(context,settings):
     db.survey_sessions.drop_index('session_expiry');db.survey_sessions.create_index('expires_at',expireAfterSeconds=60,name='session_expiry')
     try:
         assert client.get('/health').status_code==503
-        with pytest.raises(OperationFailure):
+        with pytest.raises(RuntimeError, match='database index options do not match contract'):
             with TestClient(create_app(settings)):pass
-    finally:db.survey_sessions.drop_index('session_expiry');initialize(db)
+    finally:
+        db.survey_sessions.drop_index('session_expiry')
+        db.survey_sessions.create_index('expires_at',expireAfterSeconds=0,name='session_expiry')
+        initialize(db)
     db.command('collMod','survey_responses',validator={})
     try:
         assert client.get('/health').status_code==503

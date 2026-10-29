@@ -255,7 +255,8 @@ def test_T12_basic_origin_and_input_safety(context):
 def test_T13_real_validators_indexes_and_unknown_version(context):
     app, client, db, survey, _=setup_owner(context)
     contract=inspect_contract(db)
-    assert len(contract)==4
+    assert set(contract)=={'survey_users','survey_sessions','survey_surveys','survey_responses',
+                           'survey_questions','survey_question_versions','survey_question_banks'}
     body=submission(survey,None)
     assert client.post('/api/v1/fill/'+survey['id']+'/responses',json=body).status_code==201
     doc=db.survey_responses.find_one({}); doc.pop('_id')
@@ -266,7 +267,10 @@ def test_T13_real_validators_indexes_and_unknown_version(context):
         with pytest.raises(OperationFailure) as exc: db.survey_responses.insert_one(invalid)
         assert exc.value.code==121
     db.survey_sessions.drop_index('session_expiry')
-    assert client.get('/health').status_code==503
+    try:
+        assert client.get('/health').status_code==503
+    finally:
+        db.survey_sessions.create_index('expires_at',expireAfterSeconds=0,name='session_expiry')
 
 
 def test_T13_cleanup_guard_rejects_business_cloud_and_wrong_run():

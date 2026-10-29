@@ -72,6 +72,12 @@ class Rule(Model):
         return value if value == 'END' else uuid_string(value)
 
 
+class QuestionSource(Model):
+    question_id: str = Field(pattern='^[a-f0-9]{24}$')
+    question_version_id: str = Field(pattern='^[a-f0-9]{24}$')
+    payload_hash: str = Field(pattern='^[a-f0-9]{64}$')
+
+
 class Question(Model):
     id: str
     kind: Literal['single', 'multiple', 'text', 'number'] = 'single'
@@ -80,7 +86,15 @@ class Question(Model):
     validation: dict = Field(default_factory=dict)
     options: list[Option] = Field(default_factory=list, max_length=LIMITS['options'])
     rules: list[Rule] = Field(default_factory=list, max_length=LIMITS['rules'])
+    source: QuestionSource | None = None
     _id = field_validator('id')(uuid_string)
+
+    @model_validator(mode='before')
+    @classmethod
+    def no_null_source(cls, value):
+        if isinstance(value, dict) and 'source' in value and value['source'] is None:
+            raise ValueError('来源不能设为空')
+        return value
 
     @field_validator('options')
     @classmethod
@@ -153,3 +167,59 @@ class Submission(Evaluate):
     submission_key: str
     anonymous: bool = False
     _key = field_validator('submission_key')(uuid_string)
+
+
+class QuestionPayload(Model):
+    kind: Literal['single', 'multiple', 'text', 'number'] = 'single'
+    title: str = Field(max_length=LIMITS['question_title'])
+    required: bool = False
+    validation: dict = Field(default_factory=dict)
+    options: list[Option] = Field(default_factory=list, max_length=LIMITS['options'])
+
+    @model_validator(mode='after')
+    def normalize(self):
+        question = Question.model_validate({'id': '00000000-0000-4000-8000-000000000001', **self.model_dump()})
+        self.validation = question.validation
+        return self
+
+
+class QuestionCreate(Model):
+    label: str = Field(min_length=1, max_length=200)
+    creation_key: str
+    _key = field_validator('creation_key')(uuid_string)
+
+    @field_validator('label')
+    @classmethod
+    def nonblank(cls, value):
+        if not value.strip():
+            raise ValueError('题目标签不能为空')
+        return value.strip()
+
+
+class VersionCreate(Model):
+    creation_key: str
+    operation: Literal['create', 'derive'] = 'create'
+    parent_version_id: str | None = Field(default=None, pattern='^[a-f0-9]{24}$')
+    restored_from_version_id: None = None
+    payload: QuestionPayload | None = None
+    _key = field_validator('creation_key')(uuid_string)
+
+    @model_validator(mode='after')
+    def creation_shape(self):
+        if self.operation == 'create':
+            if self.parent_version_id is not None or self.payload is None:
+                raise ValueError('首版需要payload且不能指定父版本')
+        elif self.parent_version_id is None or 'payload' in self.model_fields_set:
+            raise ValueError('派生需指定父版本且不能提供payload')
+        return self
+
+
+class VersionDraft(Revision):
+    payload: QuestionPayload
+
+
+class QuestionImport(Revision):
+    instance_id: str
+    question_id: str = Field(pattern='^[a-f0-9]{24}$')
+    question_version_id: str = Field(pattern='^[a-f0-9]{24}$')
+    _instance = field_validator('instance_id')(uuid_string)
