@@ -245,4 +245,4 @@ python scripts/v1_baseline.py --restore 提交文档/附件/v1-baseline.json --o
 
 每个输出目录须尚不存在。脚本在新隔离库中核对 4 个合成账号、3 份问卷和 8 份答卷的题意、字段、路径和统计，并检查应用重启后的读取结果，以及未知 schema 版本是否被拒绝。恢复使用新生成的临时测试会话，基线文件不包含明文密码或会话 cookie。
 
-接口依据：[app/main.py](../app/main.py)、[app/schemas.py](../app/schemas.py)、[app/config.py](../app/config.py)；锁定依赖见 [requirements.lock.txt](../requirements.lock.txt)。
+接口依据：[app/main.py](../../app/main.py)、[app/schemas.py](../../app/schemas.py)、[app/config.py](../../app/config.py)；锁定依赖见 [requirements.lock.txt](../../requirements.lock.txt)。

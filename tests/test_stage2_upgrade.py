@@ -16,7 +16,7 @@ from scripts.v1_baseline import digest, observe
 from tests.conftest import ORIGIN, HEADERS
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / '提交文档/附件/v1-baseline.json'
+ARCHIVE = ROOT / '提交文档/第一阶段/附件/v1-baseline.json'
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def test_T2_10_archived_copy_explicit_upgrade_and_legacy_http(old_copy, tmp_path
         assert 'question_result_grants' not in result.json()
         db.survey_surveys.delete_one({'_id': ObjectId(result.json()['id'])})
         # Same old endpoint fields and constraints; only Question.source is added.
-        old_api = json.loads((ROOT / '提交文档/附件/openapi-v1.json').read_text())
+        old_api = json.loads((ROOT / '提交文档/第一阶段/附件/openapi-v1.json').read_text())
         new_api = owner.get('/openapi.json').json()
         allowed = {'/api/v1/questions', '/api/v1/questions/{qid}', '/api/v1/questions/{qid}/versions',
             '/api/v1/questions/{qid}/versions/{vid}', '/api/v1/questions/{qid}/versions/{vid}/draft',
