@@ -1,0 +1,492 @@
+\section{1 项目目标与需求变化}\label{ux9879ux76eeux76eeux6807ux4e0eux9700ux6c42ux53d8ux5316}
+
+第一阶段已实现注册登录、本人问卷管理、四类题型、可配置跳转、校验、匿名与重复填写，以及整卷和单题统计。问卷发布后题意冻结，答卷按问卷实例ID保存，能回答``某次填写使用了什么配置''。第二阶段进一步要求独立保存常用题、指定用户共享、保护旧卷、追踪与恢复历史、并存与派生版本、查看使用关系、管理题库，以及汇总单题在多份问卷中的结果。
+
+若仅把旧问卷中的题目复制到另一份卷，同名题之间没有可靠的来源关系；若改成所有问卷都读取一份可变题目，修改题干或选项又会改变旧答案的含义。因此，本阶段将``题目家族''\,``定稿版本''\,``问卷实例''分开，同时保留原问卷的完整配置。目标是在原系统上增加这些管理能力，让旧问卷的题意、路径、答案和统计保持可解释，而不是重新实现填写系统。
+
+题目复用使题目所有者、使用者和问卷所有者可能分属不同账号。系统因此将题目使用权与结果访问权分开：共享允许他人在问卷中使用题目；跨用户汇总须由卷主另行授权，统计覆盖所有本人及有效授权问卷。原问卷管理和结果接口仍只允许卷主访问。
+
+\section{2 系统设计与修改范围}\label{ux7cfbux7edfux8bbeux8ba1ux4e0eux4feeux6539ux8303ux56f4}
+
+\subsection{2.1 保留的架构与新增职责}\label{ux4fddux7559ux7684ux67b6ux6784ux4e0eux65b0ux589eux804cux8d23}
+
+系统继续使用Python、FastAPI、PyMongo、Jinja2及原生JavaScript，所有持久业务数据保存在MongoDB。浏览器负责编辑和交互，服务端负责权限、配置校验、路径重放、提交和统计。未引入现成问卷系统框架或关系数据库。
+
+原四个集合保存用户、会话、问卷和答卷；新增三个集合保存题目家族、题目版本和个人题库。\nolinkurl{question_catalog.py}负责版本、共享、题库、来源验证与管理恢复；\nolinkurl{question_statistics.py}负责允许范围、版本分组、计数和分布。\nolinkurl{main.py}增加路由并保护旧草稿保存、发布和填写响应，\nolinkurl{schemas.py}和\nolinkurl{db.py}扩展请求模型及数据库契约。页面增加题目、版本历史、题库、使用清单及汇总入口。原领域、单卷统计、十进制和时间处理继续复用。
+
+原管理流程仍为草稿、发布、关闭；截止时间是独立的受理条件。问卷通过链接分发，填写者登录后作答。题目版本则为可编辑draft与不可变sealed。从已定稿版本派生或恢复时，产生另一份草稿版本，源版本不退回草稿。前端显示父版本和恢复来源，题主可独立编辑新草稿，完成后定稿供未来问卷选择。
+
+这些调整分别作用于题目的管理、使用和结果读取。原填写流程仍使用问卷内的完整配置，新增模块负责在问卷之外管理来源和历史。原设计与本阶段变化的对应关系如下。
+
+\begin{table*}[t]
+\centering\small
+\caption{从第一阶段到第二阶段的设计变化}
+\label{tab:evolution}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=0.48000\hsize\raggedright\arraybackslash}X>{\hsize=1.20000\hsize\raggedright\arraybackslash}X>{\hsize=1.24000\hsize\raggedright\arraybackslash}X>{\hsize=1.08000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+对象 & 第一阶段做法与新问题 & 第二阶段调整 & 保留的行为\\
+\midrule
+题目身份 & 题目嵌入问卷，同名题没有共同来源 & 增加家族、确切版本与实例来源 & 填写按本卷配置读取\\
+修改历史 & 发布冻结能保护旧卷，不能组织跨卷题目历史 & 独立保存draft/sealed版本及父版本、恢复来源 & 旧题意与旧答案不随新版变化\\
+访问权限 & 管理与结果按卷主限制 & 分开共享使用权与单题结果授权 & 旧管理、整卷统计和原文接口仍仅卷主访问\\
+结果统计 & 按单卷和实例统计 & 新模块按允许实例及确切版本汇总 & 原单卷统计、数值精度和去重含义保留\\
+程序职责 & 认证、领域校验、路径重放与提交已具备 & 新增题目管理、题库、来源校验及跨卷统计入口 & 原流程继续复用既有领域与统计模块\\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{2.2 版本与实例的边界}\label{ux7248ux672cux4e0eux5b9eux4f8bux7684ux8fb9ux754c}
+
+\nolinkurl{question_id}是题目家族ObjectId，负责组织历史和共享；\nolinkurl{question_version_id}是确切版本ObjectId，标识具体版本，该版本定稿后题意冻结；\nolinkurl{questions[].id}是问卷内实例UUID，仍由跳转目标、path与答案中的question\_id引用。答卷字段中的question\_id沿用旧名称，含义是实例UUID，不能与家族ObjectId混用。
+
+\nolinkurl{content_version}属于问卷，草稿为null，发布后为1，表示本卷冻结内容，不是题目版本号。\nolinkurl{schema_version}描述存储形状；\nolinkurl{revision}用于管理并发；\nolinkurl{version_no}是家族内展示序号，父子关系须读取\nolinkurl{parent_version_id}，不能由序号推断。
+
+可复用payload包含题型、题干、必答、校验和选项。rules仅属于本卷实例；导入不复制别卷的跳转目标。相同版本可以在同卷出现多次，每个实例有独立UUID。选项UUID随版本复制，其意义受版本和实例约束，不能当作全站选项身份。恢复相同内容得到的新版本即使hash相同，仍与原版分开统计。
+
+\section{3 MongoDB设计及取舍}\label{mongodbux8bbeux8ba1ux53caux53d6ux820d}
+
+\subsection{3.1 集合组织与访问边界}\label{ux96c6ux5408ux7ec4ux7ec7ux4e0eux8bbfux95eeux8fb9ux754c}
+
+问卷仍嵌入完整questions，答卷仍独立保存。填写一次取出本卷配置，路径计算无需再跟随题库授权或``最新版''；答卷增长不会扩大问卷文档。家族与版本采用引用，避免把无界历史嵌入一个家族文档。个人题库内嵌有限条目，条目保存家族与明确的默认定稿版本。
+
+关系模型可以通过表和外键组织问卷、题目与答卷；MongoDB文档则便于整体读取和保存问卷配置，用嵌套数组表达题目、选项和有序规则，每份答卷也能作为完整文档一次写入。系统按访问方式组合嵌入与引用：问卷内嵌填写所需的配置，题目历史和答卷独立存储。课程教材3.1的``存什么、怎么存、如何访问''与3.2的嵌入/引用比较，是本次取舍的依据。
+
+纯版本引用能减少问卷副本，却会扩大旧填写及历史解释的改造范围；仅复制内容而不记录来源，难以可靠识别同一道题的不同使用。采用``独立版本＋问卷副本''后，复制发生在显式导入或换版时，服务端同时保存来源ID和规范内容hash。代价是冗余与来源一致性检查，但旧卷不随题库默认版、共享撤回或新版编辑变化。使用关系从问卷source反查，不维护另一个需要同步的使用关系集合或答卷副本。
+
+方案差异主要在于``何时读取题目内容''以及``如何保留共同身份''。引用确切的不可变版本可以保护题意，但会改变原系统读取完整问卷的方式；引用可变最新版则会让历史问卷随外部修改变化。最终采用的副本仍携带确切来源，两者承担不同职责。
+
+\begin{table*}[t]
+\centering\small
+\caption{题目内容的组织方式与取舍}
+\label{tab:choices}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=0.72000\hsize\raggedright\arraybackslash}X>{\hsize=0.90000\hsize\raggedright\arraybackslash}X>{\hsize=1.38000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+组织方式 & 主要作用 & 需要承担的问题\\
+\midrule
+只复制内容，不记录来源 & 问卷能够独立读取 & 无法可靠追踪共同题目及版本\\
+始终引用可变最新版 & 修改可集中传播 & 旧问卷题意和答案解释随之改变\\
+只引用确切的不可变版本 & 历史内容固定，减少副本 & 填写需额外解析来源，旧读取流程改动较大\\
+家族文档内嵌全部历史 & 单个文档集中展示历史 & 历史持续增长，扩大文档与更新范围\\
+独立版本与问卷副本 & 同时保留来源和本卷完整内容 & 需要冗余存储及来源一致性校验\\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{3.2 七集合的职责与约束}\label{ux4e03ux96c6ux5408ux7684ux804cux8d23ux4e0eux7ea6ux675f}
+
+\nolinkurl{survey_users}保存用户名、密码哈希、注册时间；\nolinkurl{survey_sessions}保存令牌摘要、账号和到期时间。\nolinkurl{survey_surveys}保存owner、状态、配置、revision、content\_version和完整题目；\nolinkurl{survey_responses}保存卷ID、账号、匿名标记、提交键、摘要、受理时间、path及非空答案。原字段与答卷形状保持。
+
+\nolinkurl{survey_questions}保存题主、管理标签、共享账号、revision及创建幂等信息。标签不是题干，不改变任何定稿版本。共享最多100名，不包含本人；只题主可编辑、定稿、派生、恢复或改变共享名单。
+
+\nolinkurl{survey_question_versions}保存家族ID、展示序号、state、revision、parent、operation、恢复来源、payload和hash。创建、派生、恢复分别记录create、derive、restore；恢复时parent与restored\_from均指目标旧版。sealed内容无修改或删除API。版本独立存储，允许历史增长和分支。
+
+\nolinkurl{survey_question_banks}保存owner、名称、revision和条目。一个库同一家族仅一条，最多1000条；默认版本必须属于该家族且已定稿。更新默认版仅影响以后选题，不传播到旧实例。移除题库条目不删除家族、版本或既有问卷。
+
+数据库validator采用strict/error，应用另检查跨文档来源真实性、数组唯一、状态和权限。请求上限1 MiB，文档保护线8 MiB；revision与version\_no上限为2147483647。达到限制时明确拒绝，不重排历史序号或静默截断数据。
+
+原四集合与新增三集合的关系见图示。新增授权随问卷保存，使用关系从实例source反查；既有答卷继续通过问卷ID和实例UUID解释答案，未增加一份需要同步的答案副本。
+
+\begin{figure*}[t]
+\centering
+
+\begin{tikzpicture}[>=Stealth,font=\small,
+ old/.style={draw=linkblue,fill=blue!4,rounded corners=2pt,align=center,text width=40mm,minimum height=15mm},
+ new/.style={old,draw=teal!70!black,fill=teal!5},
+ lbl/.style={font=\footnotesize,fill=white,inner sep=2pt}]
+\node[old] (u) at (0,0) {survey\_users\\用户};
+\node[old] (s) at (5.7,0) {survey\_surveys\\题目副本、来源与授权};
+\node[old] (r) at (11.4,0) {survey\_responses\\路径与实例答案};
+\node[old] (session) at (0,-1.9) {survey\_sessions\\登录会话};
+\node[new] (q) at (0,-4.0) {survey\_questions\\家族、题主与共享};
+\node[new] (v) at (5.7,-4.0) {{\footnotesize survey\_question\_versions}\\独立版本与内容};
+\node[new] (b) at (11.4,-4.0) {survey\_question\_banks\\个人题库与条目};
+\draw[->] (u)--node[lbl,above]{卷主}(s);
+\draw[->] (session)--node[lbl,right]{账号}(u);
+\draw[->] (r)--node[lbl,above]{survey\_id}(s);
+\draw[->] (v)--node[lbl,above]{家族ID}(q);
+\draw[->] (s)--node[lbl,right,align=center]{source固定来源\\内容在导入时复制}(v);
+\draw[->] (b)--node[lbl,above]{默认定稿版}(v);
+\draw[->] (b.south)--++(0,-.9)-|node[lbl,pos=.25,below]{entries中的question\_id}(q.south);
+\end{tikzpicture}
+\caption{七集合与问卷内嵌结构。蓝色为原有集合，绿色为新增集合；箭头按标签表示归属、引用或来源解析关系。}\label{fig:collections}
+\end{figure*}
+
+以下仅节选一个已发布、已开启结果授权的来源实例及其答卷的关键字段。Q、V、S表示对应ObjectId，I表示实例UUID，H表示内容摘要；这些符号用于展示引用关系。实例中原有的题型、题干、必答、校验和选项继续保存，此处省略。
+
+\begin{figure}[t]
+\centering\begin{minipage}{\linewidth}
+\small\textbf{代码1　问卷来源与答卷实例的关键字段}\par\smallskip
+\begin{Verbatim}[fontsize=\footnotesize,breaklines=true,breakanywhere=true,frame=single,framesep=5pt,rulecolor=\color{linkblue!45}]
+survey_surveys:
+  _id: S
+  questions: [{
+    id: I,
+    source: {
+      question_id: Q,
+      question_version_id: V,
+      payload_hash: H
+    },
+    rules: []
+  }]
+  question_result_grants: [{
+    question_id: Q,
+    enabled: true,
+    allowed_at_publish: true
+  }]
+survey_responses:
+  survey_id: S
+  path: [I]
+  answers: [{
+    question_id: I, value: Decimal128("18")
+  }]
+\end{Verbatim}
+\end{minipage}\end{figure}
+
+同一V进入另一份问卷时产生新的实例UUID，但其来源版本不变；同一卷中重复使用V也各有实例UUID。统计先由S定位冻结问卷，再由I解析V。这样，新增统计可以追踪来源，原跳转和答案定位仍使用实例身份。
+
+\subsection{3.3 索引、原子性与一致性}\label{ux7d22ux5f15ux539fux5b50ux6027ux4e0eux4e00ux81f4ux6027}
+
+原七个显式索引保留，包括用户名唯一、会话摘要唯一及TTL、问卷归属列表、答卷列表、提交键唯一、禁止重复时的部分唯一索引。新增家族owner/shared列表索引、家族创建键唯一索引、版本的家族与序号唯一索引及家族与创建键唯一索引、题库owner列表及创建键唯一索引；问卷新增家族来源、版本来源两个索引。
+
+同库同家族唯一由应用校验和CAS保证，不依赖unique多键索引约束单文档数组内部重复。查询同一source的组合条件时保持实例对应，不能分别展开数组后形成错误配对。统计先按允许卷ID读取答卷，再匹配确切实例；分页只限制返回展示，不限制统计总体。
+
+管理写入采用revision比较并交换（CAS），而非跨集合事务。版本定稿把状态、规范payload、hash及revision在同一文档中更新；首次导入把来源实例、schema2与默认关闭的grant在同次问卷CAS中保存。版本创建用唯一索引处理序号竞争，分配与插入总共最多尝试5次，持续冲突则返回409；同creation\_key同原输入恢复既有对象，异输入409。原子性限于单文档；一次API中的跨集合读取不构成事务快照。
+
+索引与访问方式相对应：家族和版本来源索引分别支持使用清单与确切版本定位；家族内版本序号唯一索引限制并发分配；创建键唯一索引使原请求重试能够找到既有对象。共享名单和题库条目是有界数组，版本历史与答卷则独立增长，避免让一次题目修改影响持续增大的整份历史文档。
+
+数组中的组合条件还直接关系到授权正确性。假设某卷对家族Q甲未开启结果授权，对Q乙已经开启。若分别要求``数组中存在Q甲''和``数组中存在开启的授权''，两个条件可能由不同元素满足。系统使用下列条件，要求家族ID、当前开关及发布时允许值在同一条grant内成立。
+
+\begin{figure}[t]
+\centering\begin{minipage}{\linewidth}
+\small\textbf{代码2　在同一条授权记录内匹配条件}\par\smallskip
+\begin{Verbatim}[fontsize=\footnotesize,breaklines=true,breakanywhere=true,frame=single,framesep=5pt,rulecolor=\color{linkblue!45}]
+question_result_grants: {
+  $elemMatch: {
+    question_id: Q甲,
+    enabled: true,
+    allowed_at_publish: true
+  }
+}
+\end{Verbatim}
+\end{minipage}\end{figure}
+
+既有反例向真实数据库加入一条家族ID不同、两个开关均为true的grant，目标题仍只返回本人范围，验证授权条件不会跨数组元素拼接。同样，source中的家族与版本条件也必须属于同一个问卷实例。
+
+\section{4 共享、复用与历史管理}\label{ux5171ux4eabux590dux7528ux4e0eux5386ux53f2ux7ba1ux7406}
+
+\subsection{4.1 明确选版与旧卷冻结}\label{ux660eux786eux9009ux7248ux4e0eux65e7ux5377ux51bbux7ed3}
+
+独立创建题目后，可多次保存未完成草稿；定稿必须通过完整内容检查。只有sealed版能选入问卷。服务端复制payload，保留版本选项UUID，使用客户端生成并校验的新实例UUID，初始rules为空。新原生问卷仍为schema1，首次成功导入在同一次CAS中升为schema2；旧发布卷和旧答卷不回填来源。
+
+旧草稿PUT仍接收整份题目数组。对于已有来源的实例，服务端按UUID保留source并核对冻结payload；即使客户端省略source，也不能把来源剥离后修改题意。伪造来源、直接换版本、改变必答或选项均拒绝；本卷rules可以编辑。删除最后一个该家族实例时，同次保存移除对应grant。
+
+草稿专用换版只允许同一家族，保持实例UUID、整体替换payload并清空本题出边；其他题指向这一位置的入边保留，发布时重新校验。换成另一家族须删除再导入，避免继承旧授权。发布再查来源的家族、sealed状态、hash及内容，之后题意与规则冻结。使用权撤回不使已经成功保存的快照失效。
+
+\subsection{4.2 使用清单与三种独立操作}\label{ux4f7fux7528ux6e05ux5355ux4e0eux4e09ux79cdux72ecux7acbux64cdux4f5c}
+
+题主看到该题全部引用的最小清单，包括卷ID、标题、状态、到期标记、确切版本和实例数；其他使用者只看到自己的引用。清单包含draft，但不包含问卷说明、其他题、填写链接、作者账号和答卷数量。选入前页面说明这些字段会对题主可见。
+
+共享撤回阻止以后导入、换版、加入题库或更新默认版；已有草稿与已发布快照保留。原使用者可经本人问卷读取该实例的确切来源，但不能沿parent取得无权历史。结果授权撤回只影响后续跨用户汇总；题库移除只改变组织关系。三种操作相互独立，均不删除旧答卷。
+
+\subsection{4.3 单题结果授权}\label{ux5355ux9898ux7ed3ux679cux6388ux6743}
+
+卷主在发布前按本卷家族单独授权，默认关闭，受益人固定为源题所有者，覆盖本卷该家族的全部实例。本人题无需对外授权，开启本人题授权会被拒绝。发布时冻结allowed\_at\_publish，填写页告知涉及的题目与仅汇总范围；发布或关闭后只能撤回，不能首次开启或重新开启已撤权限。关闭或到期本身不撤销已有授权。
+
+旧管理、整卷统计、实例统计和填空原文接口仍以卷主为唯一访问者。单题授权不向其他共享者互相开放结果，不提供身份、答卷ID、原文、逐条数字、时间或整卷参与量。文本只返回计数。字段隔离不等于差分隐私，小样本汇总仍可能产生推断。
+
+\subsection{4.4 从两卷复用到版本恢复}\label{ux4eceux4e24ux5377ux590dux7528ux5230ux7248ux672cux6062ux590d}
+
+F2-V将上述操作连接为一条连续过程。甲创建年龄题v1，范围为0至120，定稿后供甲、乙两卷选用；甲卷包含两个v1实例，乙卷包含一个。随后从v1派生草稿v2，将题干改为``年龄（扩展范围）''、最大值改为200，定稿后由另一份问卷选用。原两卷继续使用v1的内容和规则。
+
+恢复v1时，系统根据其内容另建草稿v3，记录parent与restored\_from均为v1。v3定稿后可供后续问卷选择，v2以及正在使用v1的旧卷均保留。版本号表示创建顺序；v3的实际来源是v1，不能从序号推断它由v2修改而来。
+
+\begin{figure*}[t]
+\centering
+
+\begin{tikzpicture}[>=Stealth,font=\small,
+ box/.style={draw=linkblue,fill=blue!3,rounded corners=2pt,align=center,text width=32mm,minimum height=13mm},
+ fresh/.style={box,draw=teal!70!black,fill=teal!4},
+ lbl/.style={font=\footnotesize,fill=white,inner sep=2pt}]
+\node[box] (v1) at (0,0) {v1 sealed\\年龄0至120};
+\node[box] (old) at (5.3,0) {原甲、乙两卷\\a1、a2、b1实例};
+\node[box] (res) at (10.6,0) {旧快照、路径、答案\\与原统计保持};
+\node[fresh] (d2) at (0,-2) {v2 draft\\从v1派生并编辑};
+\node[fresh] (s2) at (5.3,-2) {v2 sealed\\范围扩展至200};
+\node[fresh] (n2) at (10.6,-2) {后续卷选择v2\\回答40，均值40.00};
+\node[fresh] (d3) at (0,-4) {v3 draft\\从v1恢复内容};
+\node[fresh] (s3) at (5.3,-4) {v3 sealed\\内容与v1相同};
+\node[fresh] (n3) at (10.6,-4) {后续卷选择v3\\回答60，均值60.00};
+\draw[->] (v1)--node[lbl,above]{选入}(old);
+\draw[->] (old)--(res);
+\draw[->] (v1)--node[lbl,right]{derive}(d2);
+\draw[->] (v1.west)--++(-.7,0)|-node[lbl,pos=.65,left]{restore}(d3.west);
+\draw[->] (d2)--node[lbl,above]{定稿}(s2);
+\draw[->] (d3)--node[lbl,above]{定稿}(s3);
+\draw[->] (s2)--node[lbl,above]{选入}(n2);
+\draw[->] (s3)--node[lbl,above]{选入}(n3);
+\end{tikzpicture}
+\caption{派生与恢复分别从v1产生新草稿，定稿后供后续问卷选择；原两卷保持对v1的引用。}\label{fig:versions}
+\end{figure*}
+
+该样本中，v1的均值为37.71，使用v2和v3的独立问卷分别回答40和60，三个版本显示为37.71、40.00和60.00。v3与v1内容及hash相同，仍以不同版本ID分别统计；另一家族中同名年龄题的回答99也不进入本家族结果。核对同时保留v1、原两卷快照、路径、答案及原统计，用实际结果检验``新版本可用''和``旧内容不变''两个方面。
+
+\section{5 跳转、校验与可靠提交}\label{ux8df3ux8f6cux6821ux9a8cux4e0eux53efux9760ux63d0ux4ea4}
+
+\subsection{5.1 数据驱动的路径重放}\label{ux6570ux636eux9a71ux52a8ux7684ux8defux5f84ux91cdux653e}
+
+原rules保存操作符、操作数和目标。单选支持eq；多选支持any、all、exact；数字支持eq、ne、gt、gte、lt、lte。规则按数组顺序取首条命中，未命中走下一题；null不匹配规则，包括数字ne。目标仅为后续实例或END，因此不形成循环。文本题无跳转。
+
+服务端从第一题重放，遇到未确认输入或错误就停留；到达结束仅返回ready\_to\_submit，不自动保存。例：多选先设any{[}x{]}到J4，再设all{[}x,y{]}到J5，回答{[}x,y{]}命中第一条而到J4。规则不依赖题目名称或固定题号。复用题导入后重新配置本卷规则，原生题与复用题共用同一重放器。
+
+回退修改后，确定跳过的答案立即删除；尚无法判定可达的后续答案放入pending，后续重放确认可达才恢复。pending仅在当前浏览器页面内存中，不作为服务器答题草稿，不可直接提交或计入统计。到END后已跳过内容不会在未来回退时复活。请求序号使迟到的评估结果不能覆盖新输入。
+
+\subsection{5.2 分层校验}\label{ux5206ux5c42ux6821ux9a8c}
+
+草稿保存检查类型、UUID、未知字段、Decimal表示和工程上限，允许未完成题干或配置，并返回发布问题。定稿和问卷发布均检查非空题干、选择题至少两个不同非空选项，以及可满足的数量、长度和数字限制；问卷发布还检查本卷规则合法性。
+
+答案先做全请求结构检查，再对有效路径做业务校验。单选必须属于当前选项；多选拒绝重复或未知ID，按题目选项顺序规范化，并检查最少、最多或恰好数量；文本去首尾空白后按Unicode码点计长；数字使用可无损写入Decimal128的字符串，拒绝NaN、Infinity和溢出，18.0仍是整数。空文本、空多选与显式null规范为空答，0是有效数值。必答检查只约束实际到达的题。
+
+\subsection{5.3 提交与管理恢复}\label{ux63d0ux4ea4ux4e0eux7ba1ux7406ux6062ux590d}
+
+用户确认后，提交接口再次完整重放，要求答案key恰好对应最终path，拒绝混入已跳过分支或缺少路径内空答。落库path保留经过的空答题，answers仅写非空值。每次有意填写使用submission\_key；同键同规范摘要恢复原收据，不新增答卷，异内容409。唯一索引兜底并发，禁止重复时的部分唯一索引约束同账号一次提交。匿名对卷主隐藏身份，但服务端仍以账号完成防重和人数去重。
+
+新管理操作同样保留原请求。创建用原creation\_key，导入用原实例UUID，保存和授权用原revision与原输入恢复。导入前须显式保存未保存的编辑，避免把保存和导入变成两个含糊的写阶段；发送中锁住输入和动作，结果未知时只允许原动作重试，确定失败后解锁纠错。旧开启授权请求不能越过后来发生的撤回重新授权。
+
+提交最后接收检查要求published且未截止，accepted\_at达到截止时即拒绝。通过检查后发生关闭，已受理请求仍可完成；成功旧键在关闭后仍可恢复收据。这一受理边界沿用第一阶段，检查与写入之间没有跨集合事务。
+
+\section{6 跨问卷统计与数值分布}\label{ux8de8ux95eeux5377ux7edfux8ba1ux4e0eux6570ux503cux5206ux5e03}
+
+\subsection{6.1 范围、版本与计数单位}\label{ux8303ux56f4ux7248ux672cux4e0eux8ba1ux6570ux5355ux4f4d}
+
+统计先确定调用者有权读取的实例，再读取答卷。题主范围为本人卷及他人有效授权卷；使用者仅为自己的卷。只纳入published/closed，包含到期卷；draft只出现在使用清单。全部版本请求返回可见sealed版的并列组，不按同名、hash、相同内容或恢复来源合并，也不把各组人数相加成一个总体人数。
+
+对确切版本v，在允许实例中取path已访问且有非空值的回答集合A。三种计数分别是：回答次数按(response\_id, instance\_id)去重；含回答答卷数按response\_id去重；回答人数按respondent\_id跨卷与实例去重。一个人同卷回答两个实例可贡献两次回答；匿名不改变内部人数。空答和未访问排除，0保留。
+
+单选给每选项次数与人数，选项人数之和可以超过本题人数；多选按有效选择次数，单份答案中的同项不重复计；未选选项保留0。文本仅给三种计数。数字按非空回答次数计算均值、精确频数和区间频数，不取账号最近一次，不把各卷均值简单平均。
+
+\subsection{6.2 精度、区间与读取时点}\label{ux7cbeux5ea6ux533aux95f4ux4e0eux8bfbux53d6ux65f6ux70b9}
+
+数值沿用Decimal精确累加，average按Decimal128精度除法，average\_display直接从精确和值与次数的分数做一次HALF\_UP两位显示，避免先近似平均再二次舍入。无回答均值为null，只有0时为0.00。
+
+精确频数按数值升序，可分页遍历；等值18和18.0归为同一规范数值。区间边界必须是2至101个严格递增Decimal字符串，桶左闭右开，另列小于首界的underflow和大于等于末界的overflow。年龄示例边界由页面明确输入{[}0,18,30,60,121{]}，并非服务端硬编码。范围外值不会被悄悄舍弃。
+
+答卷读取前先筛选授权，返回前分批复核承载grant的survey.revision；变化返回409/STATISTICS\_SCOPE\_CHANGED。即使变动与授权无关，也可能保守要求刷新。最后核对后发生撤回，已受理响应允许完成，后续请求排除该卷；不承诺实时追回或事务快照。全部允许卷和实例参与，不能只取前100卷。频数与去重集合的内存随数据量增长，当前测试没有给出无界规模或性能提升结论。
+
+\subsection{6.3 一次跨卷统计的执行过程}\label{ux4e00ux6b21ux8de8ux5377ux7edfux8ba1ux7684ux6267ux884cux8fc7ux7a0b}
+
+统计分为范围确定、回答收集和返回前复核三个阶段。范围确定先得到可见定稿版本，以及允许卷内实例到版本的映射；回答收集遍历所有允许卷，按同一份映射计算；返回前再检查外部授权卷是否变化。频数的分页只发生在全量收集之后。
+
+\begin{figure}[t]
+\centering
+
+\begin{tikzpicture}[>=Stealth,font=\small,node distance=5mm,
+ box/.style={draw=linkblue,fill=blue!3,rounded corners=2pt,align=center,text width=68mm,minimum height=11mm}]
+\node[box] (scope) {先确定允许卷、确切版本与实例\\保存外部授权卷的revision};
+\node[box,below=of scope] (read) {分批读取全部允许答卷\\按path与实例映射匹配回答};
+\node[box,below=of read] (count) {按确切版本计数与去重\\精确求和、频数、一次显示舍入};
+\node[box,below=of count] (verify) {分批复核全部外部卷revision\\缺失或变化返回409};
+\node[box,below=of verify] (out) {返回白名单汇总\\后续撤回影响下一次请求};
+\draw[->] (scope)--(read);\draw[->] (read)--(count);
+\draw[->] (count)--(verify);\draw[->] (verify)--(out);
+\end{tikzpicture}
+\caption{跨卷统计的读取顺序。授权检查先于答卷读取，返回前的revision复核确定本次受理边界。}\label{fig:statistics}
+\end{figure}
+
+下面的伪代码概括统计端点；分布端点复用相同的范围、回答收集与末次复核。每个可见sealed版本先建立独立分组；无回答的版本保留零计数，数字题均值为null。
+
+\begin{figure*}[t]
+\centering\begin{minipage}{\linewidth}
+\small\textbf{代码3　按允许范围汇总回答的核心过程}\par\smallskip
+\begin{Verbatim}[fontsize=\footnotesize,breaklines=true,breakanywhere=true,frame=single,framesep=5pt,rulecolor=\color{linkblue!45}]
+统计(家族, 调用者, 可选版本):
+  V, M, R ← 确定可见sealed版本、允许实例映射、外部卷revision
+  D ← 为V逐版本初始化计数、去重集合、精确和、频数
+  由M记录各版本的引用卷数与实例数
+  对M中全部卷ID分批遍历，每批最多100个:
+    读取本批答卷r的path、answers和内部账号标识
+    对r的每个回答(实例i, 值x)，同一i只处理一次:
+      若(r.survey_id, i)不在M或i不在r.path，跳过
+      若x为空答，跳过；数值0保留
+      v ← M[r.survey_id, i]
+      D[v].回答数 += 1
+      将r.id加入D[v].答卷集合，将账号加入人数集合
+      按题型检查已存值并累计选项次数或精确数值与频数
+  O ← 按确切版本构造白名单分组，文本只输出计数
+  数字均值由精确和/次数计算；无回答为null
+  两位显示值直接从精确和/次数做一次HALF_UP
+  分批重读R中全部外部卷revision；缺失或变化则409
+  返回O；数据库读取失败、非法存量数字或选项返回503
+\end{Verbatim}
+\end{minipage}\end{figure*}
+
+收集过程把答卷ID和账号用于内部去重，不将这些集合返回给调用者。数字的API均值与两位显示值分别从精确和值和次数计算，显示值不以前者的近似结果为输入。数据库故障会终止本次请求，不能把已经处理的部分卷作为完整统计返回；最终复核之后的撤回则影响后续请求。
+
+\section{7 测试方法与实际结果}\label{ux6d4bux8bd5ux65b9ux6cd5ux4e0eux5b9eux9645ux7ed3ux679c}
+
+\subsection{7.1 验收版本与环境}\label{ux9a8cux6536ux7248ux672cux4e0eux73afux5883}
+
+验收版本为Git提交c1a65d1。本机使用Python 3.11.17和MongoDB 8.0.32；主要依赖为FastAPI 0.143.1、PyMongo 4.18.2、Pydantic 2.14.1和Jinja2 3.1.6，测试工具为pytest 9.1.1和Playwright 1.62.1。测试使用隔离数据库。
+
+\subsection{7.2 原六类必测}\label{ux539fux516dux7c7bux5fc5ux6d4b}
+
+创建问卷：甲创建后重启应用再读取，配置保持；乙访问甲的管理资源得到404。添加题目：保存四题型及未完成草稿可得到发布问题，发布错误配置返回422；发布后再改题意409。跳转：固定F02的多选{[}x,y{]}走首条规则到J4，回退后确定跳过答案删除、可能可达答案暂存pending，END只进入确认。
+
+校验：多选重复或未知选项返回422；文本按码点边界检查；数字18与18.0等价，非法数值拒绝；F2年龄121拒绝而0可提交。提交：缺少路径内空答key、混入跳过答案返回422；相同键及同规范内容重试返回原收据，实际数据库仅一份，未知响应后仍保留原输入恢复。统计：原F01多选三项为2/2/0、数字均值10.00，空答不参与数字分母，匿名内容无账号；新增答卷后刷新结果改变。各项独立预期均与API、网页或实际BSON核对一致。
+
+上述六类由原四个测试文件及四套网页重新执行。新网页另覆盖两卷复用、三账号管理、共享撤回、历史恢复、题库换版、统计范围及新增导入/选项操作；桌面1280×900与手机390×844经过交互和截图检查。页面无JavaScript运行错误，主动触发的404/422网络提示保留。两卷、管理、统计与新增交互均检查七集合实际重启及数据保持。
+
+\subsection{7.3 F2数字样本与独立核算}\label{f2ux6570ux5b57ux6837ux672cux4e0eux72ecux7acbux6838ux7b97}
+
+甲拥有年龄v1并共享乙。甲卷有两个v1实例，乙卷有一个，乙发布前单独授权汇总给甲。门控题使空答与未访问能区分。U1在甲卷两次提交的数值分别为(0,18)、(18,空)；U2在甲卷答(30,60)；U3答(空,跳过)。乙卷中U1答120、U2答18，另外两份分别跳过和空答。部分答卷匿名，同账号仍按内部身份去重。
+
+下表按固定样本整理实际输入，r1---r8是说明中的答卷代号。空答表示实例已访问并显式提交null，跳过表示不在最终路径中；``---''表示该卷没有对应实例。账号只用于解释固定样本中的内部去重，不是跨用户统计返回的字段。
+
+\begin{table}[H]
+\centering\small
+\caption{F2-N固定输入与回答次数}
+\label{tab:inputs}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=0.60000\hsize\raggedright\arraybackslash}X>{\hsize=1.30000\hsize\raggedright\arraybackslash}X>{\hsize=1.05000\hsize\raggedright\arraybackslash}X>{\hsize=1.05000\hsize\raggedright\arraybackslash}X>{\hsize=1.00000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+答卷 & 问卷 / 账号 & 实例1 & 实例2 & 非空回答数\\
+\midrule
+r1 & 甲 / U1 & 0 & 18 & 2\\
+r2 & 甲 / U1 & 18 & 空答 & 1\\
+r3 & 甲 / U2 & 30 & 60 & 2\\
+r4 & 甲 / U3 & 空答 & 跳过 & 0\\
+r5 & 乙 / U1 & 120 & — & 1\\
+r6 & 乙 / U2 & 18 & — & 1\\
+r7 & 乙 / U4 & 跳过 & — & 0\\
+r8 & 乙 / U5 & 空答 & — & 0\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+r1在同一答卷中贡献两次回答；r1、r2属于同一账号，答卷数分别计入而人数只计一次。乙卷再次出现的U1、U2也不增加新人数。由此得到7次回答、5份含回答答卷和2名回答者。
+
+全授权结果为2卷3实例、7回答/5含回答答卷/2人。和值264，均值264/7显示37.71；精确频数0:1、18:3、30:1、60:1、120:1；边界{[}0,18,30,60,121{]}对应四桶1/3/1/2，underflow与overflow均0。这些数字由固定输入独立核算，再与API和BSON比较，未用被测函数生成期望。
+
+乙撤回结果授权后，甲仅纳入本人卷，得到5回答/3答卷/2人，和值126、均值25.20，桶1/2/1/1；使用清单仍有两卷。乙卷自身均值69.00，两卷均值直接平均47.10是错误方法。样本内部共有8份答卷和5个填写账号，但跨用户单题响应不返回这些整卷参与量。
+
+\begin{table}[H]
+\centering\small
+\caption{F2-N同一确切版本的授权范围变化}
+\label{tab:results}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=1.50000\hsize\raggedright\arraybackslash}X>{\hsize=0.75000\hsize\raggedright\arraybackslash}X>{\hsize=0.75000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+指标 & 全授权 & 乙撤回后\\
+\midrule
+纳入卷 / 实例 & 2 / 3 & 1 / 2\\
+非空回答次数 & 7 & 5\\
+含回答答卷数 & 5 & 3\\
+回答人数 & 2 & 2\\
+精确和值 & 264 & 126\\
+显示均值 & 37.71 & 25.20\\
+使用清单卷数 & 2 & 2\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{7.4 其他样本与故障边界}\label{ux5176ux4ed6ux6837ux672cux4e0eux6545ux969cux8fb9ux754c}
+
+以下按需要验证的问题组织样本。每项都从固定输入或受控故障得到独立预期，再与接口、页面或实际数据库记录比较。
+
+\begin{table}[H]
+\centering\small
+\caption{统计语义、范围与故障的验证}
+\label{tab:verification}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=0.60000\hsize\raggedright\arraybackslash}X>{\hsize=0.84000\hsize\raggedright\arraybackslash}X>{\hsize=1.56000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+验证问题 & 操作或样本 & 预期与实际结果\\
+\midrule
+单选次数与人数 & F2-S，同账号跨卷及多实例回答 & 全范围7/5/2；A为3次2人，B为3次2人，C为1次1人，D为0\\
+多选按选择计数 & F2-M，a/b/c/d及撤回授权 & 3/4/5/0，共12次选择；撤回后3/3/3/0\\
+版本与同名隔离 & F2-V，派生、恢复及同名异家族 & v1/v2/v3均值37.71/40.00/60.00；同hash恢复版独立，同名异家族排除\\
+文本与匿名范围 & F2-P，两次匿名文本回答 & 仅返回2回答/2答卷/1人，原文仅卷主旧接口可见\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]
+\centering\small
+\ContinuedFloat
+\caption{统计语义、范围与故障的验证（续）}
+\label{tab:verification-continued}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}>{\hsize=0.60000\hsize\raggedright\arraybackslash}X>{\hsize=0.84000\hsize\raggedright\arraybackslash}X>{\hsize=1.56000\hsize\raggedright\arraybackslash}X@{}}
+\toprule
+验证问题 & 操作或样本 & 预期与实际结果\\
+\midrule
+空答与0 & F2-E，无回答与仅回答0 & 无回答仍保留1卷1实例，计数0、均值null；仅0时计数1、均值0.00\\
+全量而非前一批 & 105卷，每卷一个实例和一个回答1 & 105卷/105实例/105回答/105答卷/1人，均值1.00，频数1:105\\
+末批撤权复核 & 101外部授权卷，末次复核前撤回落在第二批的第101卷 & 统计与分布均409；下一次为100卷/100实例/100回答/100答卷/1人，均值18.00；使用清单仍101卷\\
+读取失败不返回部分结果 & 真实答卷读取或末次grant读取后注入AutoReconnect & 两类故障均返回503，移除故障后按完整范围恢复\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+区间边界另用无界数字题的-1/0/18/30/60/121检查：边界{[}0,18,30,60,121{]}的四桶各1，underflow与overflow各1；再加入18.0后，与18合为频数2。原年龄题仍保持0至120约束，不能为测试121而修改已定稿题。重复或倒序边界、NaN及超出Decimal128表示范围的值均拒绝。
+
+精度回归保留原1E34、1、-1E34的六种排列，均显示0.33；1.005与\nolinkurl{1.004999999999999999999999999999999}的两种顺序均显示1.00，对应负数两种顺序均显示-1.00，四个双舍入案例继续通过。排列检查覆盖累加顺序，双舍入检查覆盖显示路径，两者共同约束数字汇总的实现。
+
+\section{8 兼容、真实问题与解决办法}\label{ux517cux5bb9ux771fux5b9eux95eeux9898ux4e0eux89e3ux51b3ux529eux6cd5}
+
+\subsection{8.1 原版恢复与新版升级分开}\label{ux539fux7248ux6062ux590dux4e0eux65b0ux7248ux5347ux7ea7ux5206ux5f00}
+
+原版恢复在3645b07隔离代码中运行未改的v1脚本和归档，schema/API全等、旧HTTP及真实重启通过。归档为4个合成账号、3份问卷、8份答卷，不是业务库全量备份。原版继续按严格全等检查，新版兼容性另按新增结构的允许差异检查。
+
+新版隔离升级逐项允许：新增家族/版本/题库三个集合及规定索引；surveys改为v1/v2双分支validator并加两个来源索引；Question模型增加可选source；增加专用管理和跨卷路由；schema2管理视图增加来源、grant及操作提示，填写视图增加汇总告知；health反映II-P3/II-W005及契约2。旧路径、旧模型原字段约束、旧权限、旧schema1响应不放宽，纯旧题不增加source:null。
+
+初始化仅在没有survey\_集合时创建完整新契约；已有库严格检查，不自动迁移。升级工具仅向本机127.0.0.1:27017的\nolinkurl{survey_test_<run_id>}隔离库执行，先停写、保存备份与完整结构，按journal记录每步前后态。未知validator、索引、schema1夹带source/grant或日志外结构均拒绝。中断后仅接受日志对应的前态/后态，重复执行核对相同结果；缺少已有升级所需备份时停止，不重建一个新基线绕过日志。
+
+演练中三个永久集合users/surveys/responses逐字段不变，四个远期会话也相同，TTL删除0；一般规则只允许有到期时间依据的会话自然删除。旧ID、题意、rules、path、answers、匿名、防重、统计和owner权限均复核。原生卷仍schema1，旧发布卷和答卷零回填。七集合真实重启通过。业务库保持v1，本阶段的升级验证仅在隔离测试库完成。
+
+\subsection{8.2 独立验收发现的实现问题}\label{ux72ecux7acbux9a8cux6536ux53d1ux73b0ux7684ux5b9eux73b0ux95eeux9898}
+
+未来revision反例显示：服务端读取旧快照后，另一请求先把revision从1写到2，旧请求若自带未来2，单独依赖写入CAS仍可能成功，覆盖新payload或刚导入实例。修复在版本保存和问卷更新前核对已读revision，再保留写入CAS应对后续竞争。两项反例修复前实际200、预期409，修复后409且新内容完整。
+
+导入反例显示未保存标题时会先PUT再POST，形成隐式保存；第一次修复后，重绘的原动作在请求发送期间仍可点。最终两入口要求显式保存，冻结原revision/body/实例ID，发送中全部锁定，未知结束后仅原动作可恢复，确定422后可纠错。真实浏览器验证请求体相同、只新增一个实例且原输入保留。
+
+升级备份缺失时，旧逻辑可能在已有步骤后重新建基线，绕过journal的完整结构约束。中断与已完成两种反例原本均未拒绝；修复后只要已有步骤或快照记录而缺备份就拒绝，同时保留首次预检失败且从未建快照的纠错正例。六项validator/index/collection故障由测试在真实MongoDB操作前后主动注入，验证数据不变、续跑和旧HTTP。
+
+\subsection{8.3 界面缺口与测试问题}\label{ux754cux9762ux7f3aux53e3ux4e0eux6d4bux8bd5ux95eeux9898}
+
+常用选择题草稿原先只有添加与改字，缺少删除和排序。该问题由静态检查发现。补充最小按钮后，网页将A/B/C/D派生编辑为C/A/E，既有选项ID保留、新选项获得新UUID，父版逐字段不变。
+
+干净Git副本曾因升级测试引用被忽略的开发目录而失败。改读已跟踪、同hash的OpenAPI附件后，原比较断言不变，干净副本235项通过。管理网页的两次超时则由测试误等上一次``已保存''提示引起，迟到重绘重置了刚选的版本；改为等待本次旧按钮离开DOM，再核对状态和选版，未降低题意、规则或权限断言。
+
+这些问题分别属于实现、界面与测试。最终235项验收对应版本c1a65d1。此前统计页面还修复了迟到请求追加旧分组、页大小变化时分页状态不一致；故障后的空结果与重试也通过真实网页检查。
+
+\section{9 AI使用过程}\label{aiux4f7fux7528ux8fc7ux7a0b}
+
+本项目使用Codex辅助需求分析、详细设计、前后端与测试编写、故障修复和文档整理。AI调用Python、pytest、真实MongoDB、Playwright和Chrome执行自动验证，并由同模型只读协作者核对需求、源码和测试预期。
+
+第二阶段开始时，我要求在原系统上增量扩展，保留核心结构、发布冻结和旧答卷，并明确区分题目家族、题目版本与问卷实例，跳转目标不能跨卷照搬，统计也不能按同名题合并。AI据此比较纯引用与完整复制，采用独立不可变版本加问卷完整副本的结构：版本记录确切来源，实例保留本卷位置和规则。这增加了冗余与来源校验，使题库更新不会改变旧卷题意，原填写与路径计算仍可复用。我还要求先在隔离副本演练升级，逐字段核对旧数据；AI据此保留原版严格恢复，并另行验证新版允许的结构差异。
+
+权限方面，我规定统计覆盖所有本人及有效授权问卷，共享使用权与结果访问权分开，原管理和结果接口继续只向卷主开放。AI将这些要求细化为发布前按家族授权、默认关闭、仅题主取得跨用户汇总，以及发布后只允许撤回且不能重开的规则。显式授权增加了操作步骤，也使卷主能够控制本卷结果是否参与汇总。使用权撤回、结果授权撤回和题库移除分别处理，已有快照继续保留。
+
+\newpage
+在统计实现中，我要求沿用原有精确求和与一次HALF\_UP显示舍入，并保持版本隔离、空答与0的区别。AI将要求落实为确切sealed版本分组，分别统计回答次数、含回答答卷数和回答人数，再提供频数和区间分布。固定F2样本由AI按输入独立核算预期，与API、真实BSON和页面结果对照；7次回答、5份答卷、2名回答者的差异检验了同卷多实例和跨卷去重，避免用单一计数代替不同业务含义。
+
+编码前的设计核对还补充了旧接口和结果范围的边界。旧草稿接口会整体替换题目数组，AI因此加入来源保留和冻结内容校验，防止省略source后改写复用题。早期统计设计包含整卷参与量，核对单题授权范围后，AI将其从跨用户响应中移除。这些调整先形成设计约束，再进入实现与测试。
+
+验收时，我要求重新对照需求、测试预期和实际数据，不以已有通过项数代替覆盖，也不通过删测试或放宽断言处理失败。独立检查发现，仅在写入时检查CAS仍可能接受基于旧快照的请求。AI根据两项实际返回200、预期409的反例，补充请求revision与已读快照的核对；复测返回409，新payload和来源实例完整保留，详见第8.2节。这一问题说明，写入条件与此前读取内容的有效性需要分别核对。
+
+其他问题按性质处理：导入隐式保存、请求发送期间的锁定缺陷和升级备份缺失属于实现问题；选项删除与排序属于界面缺口；干净副本引用忽略目录、管理网页等待旧提示属于测试错误。AI分别修正实现、补齐操作或调整测试步骤，再执行适用回归。配套AI使用日志保留真实提示、代码产出、修改与验证结果。
+
+\section{10 结论与适用边界}\label{ux7ed3ux8bbaux4e0eux9002ux7528ux8fb9ux754c}
+
+第二阶段已在原代码和核心结构上实现独立题目、版本管理、共享、使用关系、个人题库和授权跨卷统计。旧填写仍以本卷冻结配置为依据，新统计以确切版本和允许实例为依据；两种读取边界共同保持历史答案含义与权限范围。
+
+235项API/真实数据库案例、新旧网页、原版恢复和隔离升级支持上述规则在固定样本及本机环境中的功能正确性。验证复用了既有依赖环境，尚未覆盖全新依赖安装、性能对照或公网部署；系统也不提供跨集合统计快照、即时追回已受理结果、团队共同编辑或无条件全站统计。
+
+设计与实现可从仓库中的app、tests、scripts回查；配套说明提供实际运行命令、接口及逐项测试索引。教材依据为《当代数据管理系统》onlineDBMSbook的chapter3.1.md、chapter3.2.md；需求依据为项目总说明与需求变更原文。第一阶段报告、原脚本及合成归档可用于对照旧系统。

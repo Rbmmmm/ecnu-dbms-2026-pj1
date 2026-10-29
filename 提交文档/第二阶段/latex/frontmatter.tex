@@ -1,0 +1,20 @@
+\twocolumn[
+\noindent\small GitHub 仓库链接：\url{https://github.com/Rbmmmm/ecnu-dbms-2026-pj1}
+\begin{center}
+\vspace{5mm}
+{\LARGE\bfseries 基于 MongoDB 的问卷系统设计与实现\par}
+\vspace{2mm}
+{\large 题目复用、版本管理与跨卷统计\par}
+\vspace{3mm}
+{\normalsize 任北鸣\par}
+\vspace{1mm}
+{\small 当代数据管理系统 · 第二阶段课程项目报告\quad 2026 年 10 月 29 日\par}
+\end{center}
+\vspace{2mm}
+\begin{minipage}{\textwidth}
+\small\textbf{摘要}\quad 第一阶段将完整题目配置嵌入问卷，并在发布后冻结，能够稳定解释填写路径与历史答案。第二阶段要求同一道题在多卷中复用、共享、派生、恢复并汇总结果，使题目的长期身份与一次问卷中的使用位置不再相同。本项目沿用原有技术栈和填写机制，新增题目家族、不可变定稿版本和个人题库三个集合，以来源引用连接问卷内的完整副本；使用权与单题结果授权分开，跨卷统计按确切版本和允许实例计算。数字统计保留精确求和与一次显示舍入。独立验收代码与干净代码副本各235项API及真实MongoDB案例通过，新旧网页、原版严格恢复、隔离升级及七集合重启也通过。测试发现并修复了陈旧快照覆盖、导入恢复锁定和升级备份丢失等问题。本报告给出原设计的扩展理由、数据与程序变化、实际测试和适用边界；干净副本验证复用了已有依赖环境。
+
+\vspace{2mm}\noindent\textbf{关键词}\quad MongoDB；题目复用；不可变版本；授权统计；兼容升级
+\end{minipage}
+\vspace{6mm}
+]

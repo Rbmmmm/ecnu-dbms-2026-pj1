@@ -1,0 +1,41 @@
+\documentclass[UTF8,fontset=none,10pt,a4paper,twocolumn]{ctexart}
+\usepackage[a4paper,top=18mm,bottom=18mm,left=18mm,right=18mm]{geometry}
+\usepackage{fontspec}
+\IfFontExistsTF{Songti SC}{\setCJKmainfont{Songti SC}}{\setCJKmainfont{FandolSong-Regular}}
+\IfFontExistsTF{Heiti SC}{\setCJKsansfont{Heiti SC}}{\setCJKsansfont{FandolHei-Regular}}
+\IfFontExistsTF{Songti SC}{\setCJKmonofont{Songti SC}}{\setCJKmonofont{FandolSong-Regular}}
+\setmainfont{lmroman10-regular.otf}[BoldFont=lmroman10-bold.otf,ItalicFont=lmroman10-italic.otf,BoldItalicFont=lmroman10-bolditalic.otf]
+\setsansfont{lmsans10-regular.otf}[BoldFont=lmsans10-bold.otf]
+\setmonofont{lmmono10-regular.otf}[Scale=0.88]
+\usepackage{amsmath,amssymb,graphicx,booktabs,tabularx,array}
+\usepackage{caption,float,placeins,needspace,flushend,fvextra}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{xcolor,xurl,hyperref}
+\definecolor{linkblue}{HTML}{244F70}
+\hypersetup{colorlinks=true,urlcolor=linkblue,linkcolor=linkblue,pdftitle={基于 MongoDB 的问卷系统设计与实现——题目复用、版本管理与跨卷统计},pdfauthor={任北鸣}}
+\urlstyle{tt}
+\setcounter{secnumdepth}{-1}
+\setlength{\columnsep}{6.5mm}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
+\linespread{1.10}
+\ctexset{section={format=\large\bfseries,beforeskip=8pt,afterskip=5pt},subsection={format=\normalsize\bfseries,beforeskip=6pt,afterskip=4pt}}
+\captionsetup{font=small,labelfont=bf,labelsep=quad,justification=raggedright,singlelinecheck=false}
+\setlength{\textfloatsep}{11pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{11pt plus 2pt minus 2pt}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dblfloatpagefraction}{0.75}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\begin{document}
+\pagestyle{plain}
+\raggedbottom
+\clubpenalty=10000
+\widowpenalty=10000
+\input{frontmatter.tex}
+\input{body.tex}
+\end{document}
