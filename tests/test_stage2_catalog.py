@@ -281,8 +281,10 @@ def test_T2_01_permissions_whitelist_and_unexposed_routes(context):
     paths = app.openapi()['paths']
     assert {'/api/v1/questions/{qid}/sharing', '/api/v1/question-banks',
             '/api/v1/questions/{qid}/usages', '/api/v1/surveys/{sid}/question-result-grants/{qid}'} <= set(paths)
-    assert not any('distribution' in p for p in paths)
-    assert '/api/v1/questions/{qid}/statistics' not in paths
+    assert {p for p in paths if 'distribution' in p} == {'/api/v1/questions/{qid}/versions/{vid}/distribution'}
+    assert '/api/v1/questions/{qid}/statistics' in paths
+    for path in [f"/questions/{q['id']}/statistics", f"/questions/{q['id']}/versions/{v['id']}/distribution"]:
+        call(stranger, 'GET', path, status=404)
     assert 'creation_key' not in q and 'creation_digest' not in q and 'owner_id' not in q
     assert 'creation_key' not in v and 'creation_digest' not in v
 

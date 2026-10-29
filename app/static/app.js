@@ -250,7 +250,7 @@ async function manage(){
   const input=field('分享链接',location.origin+'/survey/'+sid,root);input.readOnly=true;
   const links=el('div',undefined,{class:'links'});root.append(links);link('打开填写页','/survey/'+sid,links);link('查看统计','/surveys/'+sid+'/statistics',links);
   grantControls(survey,root,async()=>survey,async()=>manage());
-  for(const q of survey.questions.filter(q=>q.source))button('查看来源：'+q.title,async()=>{const v=await api('/surveys/'+sid+'/questions/'+q.id+'/source');root.append(el('p','来源 v'+v.version_no+' · '+v.operation+' · 父版本：'+(v.parent_version_id??'无')+' · 恢复来源：'+(v.restored_from_version_id??'无')));});
+  for(const q of survey.questions.filter(q=>q.source)){button('查看来源：'+q.title,async()=>{const v=await api('/surveys/'+sid+'/questions/'+q.id+'/source');root.append(el('p','来源 v'+v.version_no+' · '+v.operation+' · 父版本：'+(v.parent_version_id??'无')+' · 恢复来源：'+(v.restored_from_version_id??'无')));});link('跨问卷统计：'+q.title,'/questions/'+q.source.question_id+'/statistics?version='+q.source.question_version_id);}
   if(survey.state==='published'){
     const deadline=field('截止时间（北京时间，可留空）',shanghaiInput(survey.deadline_at),root,'datetime-local');deadline.step='0.001';
     root.append(el('p','截止时间可留空或设为未来时间。到期后可延长截止，关闭后不能重新开放。',{class:'muted'}));
@@ -370,13 +370,92 @@ async function loadContents(q,box,offset,limit){
   button('上一页',()=>loadContents(q,box,Math.max(0,offset-limit),limit),controls).disabled=offset===0;
   button('下一页',()=>loadContents(q,box,offset+limit,limit),controls).disabled=offset+limit>=data.total;
 }
+
+async function questionStats(){
+  clear();root.append(el('h1','跨问卷题目统计'));
+  const qid=sid,query=new URLSearchParams(location.search),initial=query.get('version')??'all';
+  const controls=el('section'),results=el('section',undefined,{id:'cross-results'});root.append(controls,results);
+  root.append(el('p','仅纳入已发布、已关闭及到期问卷；草稿只出现在使用清单。空答和未访问题不计，0有效。同一答卷的不同实例分别计回答次数，答卷按份去重，人数跨卷按账号去重（含匿名）。数字为回答次数分布；不同版本仅并列，不加总人数。'));
+  root.append(el('p','每次刷新重新核对授权。授权核对后撤回的在途响应可能完成，后续请求排除；各次读取不构成同一数据快照。'));
+  const available=await api('/questions/'+qid+'/statistics');
+  const selector=selectField('统计版本',[['all','全部版本（并列分组）'],...available.groups.map(g=>[g.version_id,'v'+g.version_no+' · '+g.title])],initial,controls);
+  if(initial!=='all'&&!available.groups.some(g=>g.version_id===initial)){throw new Error('该版本不可用于统计。');}
+  let sequence=0;
+  async function refresh(){
+    const ticket=++sequence;results.replaceChildren(el('p','正在读取并核对统计范围…'));
+    document.querySelector('#error').hidden=true;
+    try{
+      const selected=selector.value;
+      const data=await api('/questions/'+qid+'/statistics?'+(selected==='all'?'versions=all':'version_id='+selected));
+      if(ticket!==sequence)return;
+      results.replaceChildren(el('p',data.scope==='owned_and_granted'?'统计范围：所有本人及有效授权问卷。其他卷仅按发布前授权向题目所有者提供本题汇总。':'统计范围：仅本人引用该版本的问卷。',{id:'cross-scope'}));
+      if(!data.groups.length)results.append(el('p','暂无可统计的已定稿版本。'));
+      for(const group of data.groups){
+        if(ticket!==sequence)return;
+        const card=el('section',undefined,{class:'card','data-version-id':group.version_id});results.append(card);
+        card.append(el('h2','v'+group.version_no+' · '+group.title),el('p','确切版本：'+group.version_id));
+        const summary=el('div',undefined,{class:'cross-summary'});card.append(summary);
+        function counts(g){summary.replaceChildren(el('p','纳入 '+g.included_survey_count+' 份问卷 / '+g.included_instance_count+' 个实例'),el('p','非空回答 '+g.answer_count+' 次 · 含回答答卷 '+g.answered_submission_count+' 份 · 跨卷去重 '+g.respondent_count+' 人'));
+          if(g.kind==='number')summary.append(el('p','平均值：'+g.average_display,{class:'average'}));}
+        counts(group);
+        if(group.options){
+          const table=el('table'),head=el('tr');for(const name of ['选项','选择次数',...(group.kind==='single'?['选择人数']:[])])head.append(el('th',name,{scope:'col'}));table.append(head);
+          for(const option of group.options){const row=el('tr');for(const value of [option.text,option.selection_count,...(group.kind==='single'?[option.respondent_count]:[])])row.append(el('td',String(value)));table.append(row);}card.append(table);
+        }
+        if(group.kind==='text')card.append(el('p','文本仅提供计数。本人问卷原文可在原问卷统计页查看。'));
+        if(group.kind==='number'){
+          const distributionControls=el('div'),values=el('div',undefined,{class:'distribution'});card.append(distributionControls,values);
+          const size=selectField('频数每页条数',[['2','2'],['20','20'],['100','100']],'20',distributionControls);
+          const edges=field('区间边界（逗号分隔，严格递增）','',distributionControls);
+          edges.placeholder='例如：0,18,30,60,121';
+          distributionControls.append(el('p','区间左闭右开，范围外数值单列。边界由你指定，所有区间均按回答次数计。'));
+          let read=0;
+          async function distribution(mode,offset=0){
+            const turn=++read;values.replaceChildren(el('p','正在读取分布…'));summary.replaceChildren();
+            const params=new URLSearchParams({mode});
+            if(mode==='exact'){params.set('offset',String(offset));params.set('limit',size.value);}
+            else params.set('boundaries',JSON.stringify(edges.value.split(/[,，]/).map(x=>x.trim())));
+            try{
+              const d=await api('/questions/'+qid+'/versions/'+group.version_id+'/distribution?'+params);
+              if(turn!==read||ticket!==sequence)return;
+              counts(d);values.replaceChildren();
+              const table=el('table'),head=el('tr');for(const name of [mode==='exact'?'数值':'区间','回答次数'])head.append(el('th',name,{scope:'col'}));table.append(head);
+              function row(label,count){const tr=el('tr');tr.append(el('td',label),el('td',String(count)));table.append(tr);}
+              if(mode==='exact'){
+                values.append(el('p','精确频数：共 '+d.total+' 种数值；当前 '+(d.items.length?d.offset+1:0)+'—'+Math.min(d.offset+d.limit,d.total)+' 种'));
+                for(const item of d.items)row(item.value,item.count);
+              }else{
+                row('小于 '+d.buckets[0].lower,d.underflow);
+                for(const bucket of d.buckets)row('['+bucket.lower+', '+bucket.upper+')',bucket.count);
+                row('大于等于 '+d.buckets.at(-1).upper,d.overflow);
+              }
+              values.append(table);
+              if(mode==='exact'){
+                if(d.offset)button('上一页频数',()=>distribution('exact',Math.max(0,d.offset-d.limit)),values);
+                if(d.offset+d.limit<d.total)button('下一页频数',()=>distribution('exact',d.offset+d.limit),values);
+              }
+            }catch(e){if(turn!==read||ticket!==sequence)return;values.replaceChildren(el('p','分布未更新，请修正输入或重新读取。'));throw e;}
+          }
+          size.onchange=()=>distribution('exact').catch(fail);
+          button('读取精确频数',()=>distribution('exact'),distributionControls);
+          button('计算区间分布',()=>distribution('buckets'),distributionControls);
+          await distribution('exact');
+          if(ticket!==sequence)return;
+        }
+      }
+    }catch(e){if(ticket!==sequence)return;results.replaceChildren(el('p','统计未更新，请重新刷新。'));throw e;}
+  }
+  selector.onchange=()=>refresh().catch(fail);
+  button('刷新跨卷统计',refresh,controls,true);
+  await refresh();
+}
 (async()=>{
   try {
     if(['login','register'].includes(page)) {await auth(); return;}
     const account=await api('/auth/me'); document.querySelector('#account').textContent=account.username;
     const logout=document.querySelector('#logout'); logout.hidden=false;
     logout.onclick=async()=>{try{await api('/auth/logout','POST',{});location.href='/login';}catch(e){fail(e);}};
-    await ({list,edit,manage,fill,catalog,banks,statistics:stats}[page])();
+    await ({list,edit,manage,fill,catalog,banks,statistics:stats,'question-statistics':questionStats}[page])();
   } catch(e) {root.replaceChildren(el('h1','暂时无法打开页面'));fail(e);}
 })();
 
@@ -412,6 +491,7 @@ async function catalog(){
   const selected=versions.find(v=>v.id===params.get('version'))??versions[0];
   const familyBox=el('section',undefined,{class:'card',id:'family-management'});root.append(familyBox);
   familyBox.append(el('h2',family.label));
+  link('查看跨问卷统计','/questions/'+qid+'/statistics',familyBox);
   if(family.role==='owner'){
     const labelInput=field('修改管理标签',family.label,familyBox);
     frozenButton('保存标签',familyBox,async()=>{requireClean();return {revision:family.revision,label:labelInput.value};},body=>api('/questions/'+qid,'PATCH',body),async()=>catalog());

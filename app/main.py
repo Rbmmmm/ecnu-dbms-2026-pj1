@@ -27,6 +27,7 @@ from app.domain import Problem, publish_issues, replay
 from app.schemas import Credentials, SurveyCreate, Draft, Revision, Evaluate, Submission, LoginCredentials, DeadlineChange
 from app.statistics import statistics, contents
 from app import question_catalog as catalog
+from app import question_statistics as cross_statistics
 from app.schemas import QuestionCreate, VersionCreate, VersionDraft, QuestionImport
 from app.schemas import QuestionLabel, QuestionSharing, BankCreate, BankUpdate, SourceChange, ResultGrant
 
@@ -206,7 +207,7 @@ def create_app(settings=None):
             inspect_contract(database)
         except RuntimeError:
             raise Problem(503, 'SCHEMA_NOT_READY', '数据库契约检查失败')
-        return {'status': 'ready', 'stage': 'II-P3', 'work_package': 'II-W004', 'schema_version': 2}
+        return {'status': 'ready', 'stage': 'II-P3', 'work_package': 'II-W005', 'schema_version': 2}
 
     @app.post('/api/v1/auth/register', status_code=201)
     def register(body: Credentials, request: Request, database=Depends(db)):
@@ -524,6 +525,34 @@ def create_app(settings=None):
                 'versions': [{'version_id': str(key), 'instance_count': value} for key, value in sorted(counts.items())]})
         return {'items': result, 'total': total}
 
+    def statistics_query(request, allowed):
+        keys = list(request.query_params.keys())
+        if set(keys) - allowed or any(len(request.query_params.getlist(k)) != 1 for k in keys):
+            raise Problem(422, 'INVALID_INPUT', '统计参数无效，请使用版本或分布筛选')
+
+    @app.get('/api/v1/questions/{qid}/statistics')
+    def cross_question_stats(qid: str, request: Request, response: Response,
+                             version_id: str | None = None, versions: Literal['all'] | None = None,
+                             account=Depends(user), database=Depends(db)):
+        statistics_query(request, {'version_id', 'versions'})
+        if version_id is not None and versions is not None:
+            raise Problem(422, 'INVALID_INPUT', '确切版本与全部版本不能同时选择')
+        response.headers['Cache-Control'] = 'no-store'
+        return cross_statistics.statistics(database, oid(qid), account['_id'],
+                                           oid(version_id) if version_id is not None else None)
+
+    @app.get('/api/v1/questions/{qid}/versions/{vid}/distribution')
+    def question_distribution(qid: str, vid: str, request: Request, response: Response,
+                              mode: Literal['exact', 'buckets'] = 'exact', boundaries: str | None = None,
+                              offset: int = Query(0, ge=0, le=LIMITS['offset']),
+                              limit: int = Query(20, ge=1, le=100), account=Depends(user), database=Depends(db)):
+        statistics_query(request, {'mode', 'boundaries', 'offset', 'limit'})
+        if mode == 'buckets' and ('offset' in request.query_params or 'limit' in request.query_params):
+            raise Problem(422, 'INVALID_INPUT', '区间分布一次返回全部区间，不使用分页')
+        response.headers['Cache-Control'] = 'no-store'
+        return cross_statistics.distribution(database, oid(qid), oid(vid), account['_id'],
+                                              mode, boundaries, offset, limit)
+
     def bank_view(doc, uid, database):
         result = public({k: doc[k] for k in ['_id', 'title', 'revision', 'created_at', 'updated_at']})
         entries = []
@@ -689,6 +718,10 @@ def create_app(settings=None):
     @app.get('/question-banks')
     def banks_page(request: Request):
         return page(request, 'banks')
+
+    @app.get('/questions/{qid}/statistics')
+    def cross_stats_page(qid: str, request: Request):
+        return page(request, 'question-statistics', qid)
 
     @app.get('/surveys')
     def survey_page(request: Request):

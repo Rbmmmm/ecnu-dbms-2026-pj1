@@ -87,7 +87,9 @@ def test_T2_10_archived_copy_explicit_upgrade_and_legacy_http(old_copy, tmp_path
             '/api/v1/surveys/{sid}/questions/{iid}/source', '/questions',
             '/api/v1/questions/{qid}/sharing', '/api/v1/questions/{qid}/usages',
             '/api/v1/question-banks', '/api/v1/question-banks/{bid}', '/question-banks',
-            '/api/v1/surveys/{sid}/question-result-grants/{qid}'}
+            '/api/v1/surveys/{sid}/question-result-grants/{qid}',
+            '/api/v1/questions/{qid}/statistics', '/api/v1/questions/{qid}/versions/{vid}/distribution',
+            '/questions/{qid}/statistics'}
         assert set(new_api['paths']) - set(old_api['paths']) == allowed
         for path, spec in old_api['paths'].items():
             assert new_api['paths'][path] == spec

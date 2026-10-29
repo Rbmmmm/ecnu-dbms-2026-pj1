@@ -270,7 +270,10 @@ def test_T2_02_result_grant_freeze_revoke_notice_and_original_owner_only(context
     off = publish(b, imported(b, new_survey(b), q, v, str(uuid4())))
     grant(b, off, q, True, 409)
     for path in [f"/questions/{q['id']}/statistics", f"/questions/{q['id']}/versions/{v['id']}/distribution"]:
-        call(a, 'GET', path, status=404)
+        result = call(a, 'GET', path)
+        groups = result['groups'] if 'groups' in result else [result]
+        assert len(groups) == 1 and groups[0]['included_survey_count'] == 1
+        assert groups[0]['answer_count'] == 0
 
 
 def test_T2_02_f2p_text_grant_does_not_expose_raw_answers(context):
