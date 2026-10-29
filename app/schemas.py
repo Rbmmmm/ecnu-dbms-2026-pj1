@@ -20,6 +20,12 @@ def uuid_string(value):
     return value
 
 
+def nonblank_text(value):
+    if not value.strip():
+        raise ValueError('名称不能为空')
+    return value.strip()
+
+
 class LoginCredentials(Model):
     username: str = Field(max_length=100)
     password: str = Field(max_length=128)
@@ -198,19 +204,23 @@ class QuestionCreate(Model):
 
 class VersionCreate(Model):
     creation_key: str
-    operation: Literal['create', 'derive'] = 'create'
+    operation: Literal['create', 'derive', 'restore'] = 'create'
     parent_version_id: str | None = Field(default=None, pattern='^[a-f0-9]{24}$')
-    restored_from_version_id: None = None
+    restored_from_version_id: str | None = Field(default=None, pattern='^[a-f0-9]{24}$')
     payload: QuestionPayload | None = None
     _key = field_validator('creation_key')(uuid_string)
 
     @model_validator(mode='after')
     def creation_shape(self):
         if self.operation == 'create':
-            if self.parent_version_id is not None or self.payload is None:
+            if self.parent_version_id is not None or self.restored_from_version_id is not None or self.payload is None:
                 raise ValueError('首版需要payload且不能指定父版本')
         elif self.parent_version_id is None or 'payload' in self.model_fields_set:
             raise ValueError('派生需指定父版本且不能提供payload')
+        if self.operation == 'derive' and self.restored_from_version_id is not None:
+            raise ValueError('派生不能指定恢复来源')
+        if self.operation == 'restore' and self.restored_from_version_id != self.parent_version_id:
+            raise ValueError('恢复来源必须等于父版本')
         return self
 
 
@@ -223,3 +233,46 @@ class QuestionImport(Revision):
     question_id: str = Field(pattern='^[a-f0-9]{24}$')
     question_version_id: str = Field(pattern='^[a-f0-9]{24}$')
     _instance = field_validator('instance_id')(uuid_string)
+
+
+class QuestionLabel(Revision):
+    label: str = Field(min_length=1, max_length=200)
+    _label = field_validator('label')(nonblank_text)
+
+
+class QuestionSharing(Revision):
+    usernames: list[Annotated[str, Field(min_length=1, max_length=100)]] = Field(max_length=100)
+
+
+class BankCreate(Model):
+    title: str = Field(min_length=1, max_length=200)
+    creation_key: str
+    _key = field_validator('creation_key')(uuid_string)
+    _title = field_validator('title')(nonblank_text)
+
+
+class BankEntry(Model):
+    question_id: str = Field(pattern='^[a-f0-9]{24}$')
+    default_version_id: str = Field(pattern='^[a-f0-9]{24}$')
+
+
+class BankUpdate(Revision):
+    title: str = Field(min_length=1, max_length=200)
+    entries: list[BankEntry] = Field(max_length=1000)
+    _title = field_validator('title')(nonblank_text)
+
+    @field_validator('entries')
+    @classmethod
+    def unique_entries(cls, value):
+        if len({x.question_id for x in value}) != len(value):
+            raise ValueError('同一题库不能重复加入同家族题目')
+        return value
+
+
+class SourceChange(Revision):
+    question_id: str = Field(pattern='^[a-f0-9]{24}$')
+    question_version_id: str = Field(pattern='^[a-f0-9]{24}$')
+
+
+class ResultGrant(Revision):
+    enabled: bool

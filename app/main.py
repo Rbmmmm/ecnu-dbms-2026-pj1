@@ -28,6 +28,7 @@ from app.schemas import Credentials, SurveyCreate, Draft, Revision, Evaluate, Su
 from app.statistics import statistics, contents
 from app import question_catalog as catalog
 from app.schemas import QuestionCreate, VersionCreate, VersionDraft, QuestionImport
+from app.schemas import QuestionLabel, QuestionSharing, BankCreate, BankUpdate, SourceChange, ResultGrant
 
 COOKIE = 'survey_session'
 PASSWORD = PasswordHash.recommended()
@@ -179,6 +180,11 @@ def create_app(settings=None):
     def view(survey):
         value = public(survey)
         value.pop('owner_id', None)
+        if survey['schema_version'] == 2:
+            value['result_grant_options'] = [{'question_id': str(g['question_id']),
+                'external': app.state.db.survey_questions.find_one(
+                    {'_id': g['question_id'], 'owner_id': survey['owner_id']}, {'_id': 1}) is None}
+                for g in survey['question_result_grants']]
         value['share_url'] = '/survey/' + str(survey['_id'])
         value['publish_issues'] = publish_issues(public(survey)) if survey['state'] == 'draft' else []
         return value
@@ -200,7 +206,7 @@ def create_app(settings=None):
             inspect_contract(database)
         except RuntimeError:
             raise Problem(503, 'SCHEMA_NOT_READY', '数据库契约检查失败')
-        return {'status': 'ready', 'stage': 'II-P2', 'work_package': 'II-W003', 'schema_version': 2}
+        return {'status': 'ready', 'stage': 'II-P3', 'work_package': 'II-W004', 'schema_version': 2}
 
     @app.post('/api/v1/auth/register', status_code=201)
     def register(body: Credentials, request: Request, database=Depends(db)):
@@ -407,8 +413,14 @@ def create_app(settings=None):
             raise Problem(422, 'CONTENTS_NOT_SUPPORTED', '选择题请查看选项统计')
         return contents(database, survey, question, offset, limit)
 
-    def family_view(doc):
-        return public({k: doc[k] for k in ['_id', 'label', 'revision', 'created_at', 'updated_at']}) | {'role': 'owner'}
+    def family_view(doc, uid=None, database=None):
+        is_owner = uid is None or doc['owner_id'] == uid
+        result = public({k: doc[k] for k in ['_id', 'label', 'revision', 'created_at', 'updated_at']})
+        result['role'] = 'owner' if is_owner else 'shared'
+        if is_owner and database is not None:
+            result['shared_with'] = sorted(x['username'] for x in database.survey_users.find(
+                {'_id': {'$in': doc['shared_with']}}, {'username': 1}))
+        return result
 
     def version_view(doc):
         result = public({k: doc[k] for k in ['_id', 'question_id', 'version_no', 'revision', 'state',
@@ -424,15 +436,32 @@ def create_app(settings=None):
         return family_view(doc)
 
     @app.get('/api/v1/questions')
-    def questions(scope: Literal['owned'] = 'owned', offset: int = Query(0, ge=0, le=LIMITS['offset']),
+    def questions(scope: Literal['owned', 'shared'] = 'owned', offset: int = Query(0, ge=0, le=LIMITS['offset']),
                   limit: int = Query(20, ge=1, le=100), account=Depends(user), database=Depends(db)):
-        query = {'owner_id': account['_id']}
+        query = {'owner_id': account['_id']} if scope == 'owned' else {'shared_with': account['_id'], 'owner_id': {'$ne': account['_id']}}
         rows = database.survey_questions.find(query).sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit)
-        return {'items': [family_view(row) for row in rows], 'total': database.survey_questions.count_documents(query)}
+        return {'items': [family_view(row, account['_id']) for row in rows], 'total': database.survey_questions.count_documents(query)}
 
     @app.get('/api/v1/questions/{qid}')
     def get_question(qid: str, account=Depends(user), database=Depends(db)):
-        return family_view(catalog.family(database, oid(qid), account['_id']))
+        return family_view(catalog.family(database, oid(qid), account['_id'], use=True), account['_id'], database)
+
+    @app.patch('/api/v1/questions/{qid}')
+    def rename_question(qid: str, body: QuestionLabel, request: Request, account=Depends(user), database=Depends(db)):
+        doc = catalog.family(database, oid(qid), account['_id'])
+        return family_view(catalog.cas_document(database.survey_questions, doc, body.revision,
+            {'label': body.label}, server_time(request)), account['_id'], database)
+
+    @app.put('/api/v1/questions/{qid}/sharing')
+    def share_question(qid: str, body: QuestionSharing, request: Request, account=Depends(user), database=Depends(db)):
+        doc = catalog.family(database, oid(qid), account['_id'])
+        names = [username(x) for x in body.usernames]
+        accounts = list(database.survey_users.find({'username': {'$in': names}}, {'username': 1}))
+        if len(set(names)) != len(names) or len(accounts) != len(names) or account['username'] in names:
+            raise Problem(422, 'INVALID_SHARING', '共享名单需为不重复、已存在的其他用户')
+        changes = {'shared_with': sorted(x['_id'] for x in accounts)}
+        return family_view(catalog.cas_document(database.survey_questions, doc, body.revision,
+            changes, server_time(request)), account['_id'], database)
 
     @app.post('/api/v1/questions/{qid}/versions')
     def create_question_version(qid: str, body: VersionCreate, request: Request, response: Response,
@@ -444,15 +473,91 @@ def create_app(settings=None):
     @app.get('/api/v1/questions/{qid}/versions')
     def question_versions(qid: str, offset: int = Query(0, ge=0, le=LIMITS['offset']),
                           limit: int = Query(20, ge=1, le=100), account=Depends(user), database=Depends(db)):
-        catalog.family(database, oid(qid), account['_id'])
+        doc = catalog.family(database, oid(qid), account['_id'], use=True)
         query = {'question_id': oid(qid)}
+        if doc['owner_id'] != account['_id']:
+            query['state'] = 'sealed'
         rows = database.survey_question_versions.find(query).sort('version_no', -1).skip(offset).limit(limit)
         return {'items': [version_view(row) for row in rows], 'total': database.survey_question_versions.count_documents(query)}
 
     @app.get('/api/v1/questions/{qid}/versions/{vid}')
     def get_question_version(qid: str, vid: str, account=Depends(user), database=Depends(db)):
-        catalog.family(database, oid(qid), account['_id'])
-        return version_view(catalog.version(database, oid(qid), oid(vid)))
+        doc = catalog.family(database, oid(qid), account['_id'], use=True)
+        selected = catalog.version(database, oid(qid), oid(vid))
+        if doc['owner_id'] != account['_id'] and selected['state'] != 'sealed':
+            raise Problem(404, 'NOT_FOUND', '版本不存在')
+        return version_view(selected)
+
+    @app.get('/api/v1/questions/{qid}/usages')
+    def question_usages(qid: str, request: Request, version_id: str | None = None,
+                        offset: int = Query(0, ge=0, le=LIMITS['offset']), limit: int = Query(20, ge=1, le=100),
+                        account=Depends(user), database=Depends(db)):
+        qid = oid(qid)
+        family = database.survey_questions.find_one({'_id': qid})
+        own = family is not None and family['owner_id'] == account['_id']
+        query = {'questions.source.question_id': qid}
+        if not own:
+            query['owner_id'] = account['_id']
+        referenced = database.survey_surveys.find_one(query, {'_id': 1})
+        if not family or (not own and account['_id'] not in family['shared_with'] and not referenced):
+            raise Problem(404, 'NOT_FOUND', '题目不存在')
+        vid = oid(version_id) if version_id is not None else None
+        if vid is not None:
+            selected = catalog.version(database, qid, vid)
+            if not own and (selected['state'] != 'sealed' or
+                    (account['_id'] not in family['shared_with'] and not database.survey_surveys.find_one(
+                        {**query, 'questions': {'$elemMatch': {'source.question_id': qid, 'source.question_version_id': vid}}}))):
+                raise Problem(404, 'NOT_FOUND', '版本不存在')
+            query['questions'] = {'$elemMatch': {'source.question_id': qid, 'source.question_version_id': vid}}
+        total = database.survey_surveys.count_documents(query)
+        rows = database.survey_surveys.find(query).sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit)
+        result, time = [], server_time(request)
+        for survey in rows:
+            counts = {}
+            for question in survey['questions']:
+                source = question.get('source', {})
+                if source.get('question_id') == qid and (vid is None or source['question_version_id'] == vid):
+                    key = source['question_version_id']
+                    counts[key] = counts.get(key, 0) + 1
+            result.append({'survey_id': str(survey['_id']), 'title': survey['title'], 'state': survey['state'],
+                'expired': survey['deadline_at'] is not None and survey['deadline_at'] <= time,
+                'versions': [{'version_id': str(key), 'instance_count': value} for key, value in sorted(counts.items())]})
+        return {'items': result, 'total': total}
+
+    def bank_view(doc, uid, database):
+        result = public({k: doc[k] for k in ['_id', 'title', 'revision', 'created_at', 'updated_at']})
+        entries = []
+        for x in doc['entries']:
+            family = database.survey_questions.find_one({'_id': x['question_id'], '$or': [{'owner_id': uid}, {'shared_with': uid}]})
+            selected = database.survey_question_versions.find_one({'_id': x['default_version_id'],
+                'question_id': x['question_id'], 'state': 'sealed'}) if family else None
+            item = public(x) | {'available': bool(selected)}
+            if selected:
+                item.update(label=family['label'], version_no=selected['version_no'])
+            entries.append(item)
+        return {**result, 'entries': entries}
+
+    @app.post('/api/v1/question-banks')
+    def create_bank(body: BankCreate, request: Request, response: Response, account=Depends(user), database=Depends(db)):
+        doc, created = catalog.create_bank(database, account['_id'], body, server_time(request))
+        response.status_code = 201 if created else 200
+        return bank_view(doc, account['_id'], database)
+
+    @app.get('/api/v1/question-banks')
+    def banks(offset: int = Query(0, ge=0, le=LIMITS['offset']), limit: int = Query(20, ge=1, le=100),
+              account=Depends(user), database=Depends(db)):
+        query = {'owner_id': account['_id']}
+        rows = database.survey_question_banks.find(query).sort([('created_at', -1), ('_id', -1)]).skip(offset).limit(limit)
+        return {'items': [bank_view(x, account['_id'], database) for x in rows], 'total': database.survey_question_banks.count_documents(query)}
+
+    @app.get('/api/v1/question-banks/{bid}')
+    def get_bank(bid: str, account=Depends(user), database=Depends(db)):
+        return bank_view(catalog.bank(database, oid(bid), account['_id']), account['_id'], database)
+
+    @app.put('/api/v1/question-banks/{bid}')
+    def save_bank(bid: str, body: BankUpdate, request: Request, account=Depends(user), database=Depends(db)):
+        doc = catalog.bank(database, oid(bid), account['_id'])
+        return bank_view(catalog.save_bank(database, doc, account['_id'], body, server_time(request)), account['_id'], database)
 
     @app.put('/api/v1/questions/{qid}/versions/{vid}/draft')
     def save_question_version(qid: str, vid: str, body: VersionDraft, request: Request,
@@ -508,6 +613,59 @@ def create_app(settings=None):
         source = question['source']
         return version_view(catalog.version(database, source['question_id'], source['question_version_id']))
 
+    @app.put('/api/v1/surveys/{sid}/questions/{iid}/source')
+    def change_source(sid: str, iid: str, body: SourceChange, request: Request,
+                      account=Depends(user), database=Depends(db)):
+        survey = owned(database, sid, account)
+        existing = next((q for q in survey['questions'] if q['id'] == iid and 'source' in q), None)
+        if existing is None:
+            raise Problem(404, 'NOT_FOUND', '来源不存在')
+        if existing['source']['question_id'] != oid(body.question_id):
+            raise Problem(422, 'DIFFERENT_QUESTION_FAMILY', '只能换用同一家族的版本')
+        if (survey['revision'] == body.revision + 1 and
+                existing['source']['question_version_id'] == oid(body.question_version_id) and not existing['rules']):
+            return view(survey)
+        if survey['state'] != 'draft' or survey['revision'] != body.revision:
+            raise Problem(409, 'REVISION_OR_STATE_CONFLICT', '状态或版本已改变')
+        catalog.family(database, body.question_id, account['_id'], use=True)
+        selected = catalog.version(database, body.question_id, body.question_version_id)
+        if selected['state'] != 'sealed':
+            raise Problem(409, 'VERSION_NOT_SEALED', '请先定稿题目版本')
+        replacement = {'id': iid, **deepcopy(selected['payload']), 'rules': [],
+            'source': {'question_id': oid(body.question_id), 'question_version_id': selected['_id'],
+                       'payload_hash': selected['payload_hash']}}
+        catalog.validate_source(database, replacement)
+        catalog.family(database, body.question_id, account['_id'], use=True)
+        questions = [replacement if q['id'] == iid else q for q in survey['questions']]
+        changes = {'questions': questions, 'question_result_grants': catalog.remaining_grants(survey, questions),
+                   'updated_at': server_time(request)}
+        catalog.size_check({**survey, **changes})
+        return update(database, survey, body.revision, changes, 'draft')
+
+    @app.put('/api/v1/surveys/{sid}/question-result-grants/{qid}')
+    def change_result_grant(sid: str, qid: str, body: ResultGrant, request: Request,
+                            account=Depends(user), database=Depends(db)):
+        survey = owned(database, sid, account)
+        qid = oid(qid)
+        if not any(q.get('source', {}).get('question_id') == qid for q in survey['questions']):
+            raise Problem(404, 'NOT_FOUND', '本卷没有该来源题目')
+        family = database.survey_questions.find_one({'_id': qid})
+        if not family:
+            raise Problem(422, 'INVALID_SOURCE', '来源题目不存在')
+        if body.enabled and family['owner_id'] == account['_id']:
+            raise Problem(422, 'OWN_QUESTION_GRANT', '本人题目不需要对外授权')
+        grants = catalog.remaining_grants(survey, survey['questions'])
+        grant = next(g for g in grants if g['question_id'] == qid)
+        if survey['revision'] == body.revision + 1 and grant['enabled'] == body.enabled:
+            return view(survey)
+        if survey['revision'] != body.revision:
+            raise Problem(409, 'REVISION_OR_STATE_CONFLICT', '状态或版本已改变')
+        if survey['state'] != 'draft' and body.enabled:
+            raise Problem(409, 'GRANT_FROZEN', '发布后仅可撤回，不能开启或重新开启授权')
+        grant['enabled'] = body.enabled
+        return update(database, survey, body.revision,
+            {'question_result_grants': grants, 'updated_at': server_time(request)}, survey['state'])
+
     @app.get('/favicon.ico', include_in_schema=False)
     def favicon():
         return Response(status_code=204)
@@ -527,6 +685,10 @@ def create_app(settings=None):
     @app.get('/questions')
     def catalog_page(request: Request):
         return page(request, 'catalog')
+
+    @app.get('/question-banks')
+    def banks_page(request: Request):
+        return page(request, 'banks')
 
     @app.get('/surveys')
     def survey_page(request: Request):

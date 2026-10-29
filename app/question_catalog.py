@@ -97,7 +97,7 @@ def create_version(db, qid, uid, body, time):
     if existing:
         return same_creation(existing, hashed)
     parent = None
-    if body.operation == 'derive':
+    if body.operation in {'derive', 'restore'}:
         parent = version(db, qid, body.parent_version_id)
         if parent['state'] != 'sealed':
             raise Problem(409, 'VERSION_NOT_SEALED', '只能从定稿版本派生')
@@ -109,7 +109,8 @@ def create_version(db, qid, uid, body, time):
             raise Problem(409, 'VERSION_LIMIT', '版本序号已达上限')
         doc = {**lookup, 'schema_version': 1, 'version_no': number, 'revision': 1,
             'state': 'draft', 'operation': body.operation,
-            'parent_version_id': parent['_id'] if parent else None, 'restored_from_version_id': None,
+            'parent_version_id': parent['_id'] if parent else None,
+            'restored_from_version_id': parent['_id'] if body.operation == 'restore' else None,
             'creation_digest': hashed, 'payload': initial, 'payload_hash': None,
             'created_at': time, 'updated_at': time, 'sealed_at': None}
         size_check(doc)
@@ -128,9 +129,12 @@ def save_version(db, qid, vid, uid, revision, value, time, seal=False):
     doc = version(db, qid, vid)
     if seal and doc['state'] == 'sealed':
         return doc
+    value = deepcopy(doc['payload']) if seal else payload_bson(value)
+    if (not seal and doc['state'] == 'draft' and doc['revision'] == revision + 1
+            and wire(doc['payload']) == wire(value)):
+        return doc
     if revision == LIMITS['revision']:
         raise Problem(409, 'REVISION_LIMIT', '版本已达上限')
-    value = deepcopy(doc['payload']) if seal else payload_bson(value)
     changes = {'payload': value, 'updated_at': time}
     if seal:
         problems = issues(value)
@@ -175,3 +179,61 @@ def remaining_grants(survey, questions):
     grants = {g['question_id']: deepcopy(g) for g in survey.get('question_result_grants', [])}
     return [grants.get(qid, {'question_id': qid, 'enabled': False, 'allowed_at_publish': False})
             for qid in sorted(families)]
+
+
+def cas_document(collection, doc, revision, changes, time):
+    # PUT/PATCH retries may recover exactly the immediately following revision.
+    if doc['revision'] != revision:
+        if doc['revision'] == revision + 1 and all(doc.get(k) == v for k, v in changes.items()):
+            return doc
+        raise Problem(409, 'REVISION_CONFLICT', '版本已改变，请刷新后重试')
+    if revision == LIMITS['revision']:
+        raise Problem(409, 'REVISION_LIMIT', '管理版本已达上限')
+    changes = {**changes, 'updated_at': time}
+    size_check({**doc, **changes})
+    updated = collection.find_one_and_update({'_id': doc['_id'], 'revision': revision},
+        {'$set': changes, '$inc': {'revision': 1}}, return_document=True)
+    if updated is None:
+        raise Problem(409, 'REVISION_CONFLICT', '版本已改变，请刷新后重试')
+    return updated
+
+
+def create_bank(db, uid, body, time):
+    data = body.model_dump()
+    lookup = {'owner_id': uid, 'creation_key': body.creation_key}
+    hashed = digest(data)
+    existing = db.survey_question_banks.find_one(lookup)
+    if existing:
+        return same_creation(existing, hashed)
+    doc = {**lookup, 'schema_version': 1, 'title': body.title, 'entries': [], 'revision': 1,
+           'creation_digest': hashed, 'created_at': time, 'updated_at': time}
+    try:
+        db.survey_question_banks.insert_one(doc)
+    except DuplicateKeyError:
+        return same_creation(db.survey_question_banks.find_one(lookup), hashed)
+    return doc, True
+
+
+def bank(db, bid, uid):
+    doc = db.survey_question_banks.find_one({'_id': ObjectId(bid), 'owner_id': uid})
+    if not doc:
+        raise Problem(404, 'NOT_FOUND', '题库不存在')
+    return doc
+
+
+def save_bank(db, doc, uid, body, time):
+    entries = [{'question_id': ObjectId(x.question_id), 'default_version_id': ObjectId(x.default_version_id)}
+               for x in body.entries]
+    changes = {'title': body.title, 'entries': entries}
+    if doc['revision'] != body.revision:
+        return cas_document(db.survey_question_banks, doc, body.revision, changes, time)
+    previous = {x['question_id']: x['default_version_id'] for x in doc['entries']}
+    changed = [x for x in entries if previous.get(x['question_id']) != x['default_version_id']]
+    for x in changed:
+        family(db, x['question_id'], uid, use=True)
+        if version(db, x['question_id'], x['default_version_id'])['state'] != 'sealed':
+            raise Problem(409, 'VERSION_NOT_SEALED', '题库默认版本必须已定稿')
+    # Last permission reads admit the changed entries; later revocation does not undo this save.
+    for x in changed:
+        family(db, x['question_id'], uid, use=True)
+    return cas_document(db.survey_question_banks, doc, body.revision, changes, time)

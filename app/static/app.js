@@ -120,8 +120,15 @@ async function edit() {
   let survey=await api('/surveys/'+sid);
   let pendingImport=null;
   const available=[];
-  for(let offset=0;;offset+=100){const rows=await api('/questions?limit=100&offset='+offset);for(const family of rows.items){for(let vo=0;;vo+=100){const versions=await api('/questions/'+family.id+'/versions?limit=100&offset='+vo);available.push(...versions.items.filter(v=>v.state==='sealed').map(v=>({family,version:v})));if(vo+100>=versions.total)break;}}if(offset+100>=rows.total)break;}
+  for(const scope of ['owned','shared'])for(const family of await allItems('/questions?scope='+scope)){
+    for(const version of await allItems('/questions/'+family.id+'/versions'))if(version.state==='sealed')available.push({family,version});
+  }
+  const personalBanks=await allItems('/question-banks');
+  const bankChoices=personalBanks.flatMap(bank=>bank.entries.filter(x=>x.available).map(x=>({bank,entry:x})));
   let deadlineRaw=shanghaiInput(survey.deadline_at),deadlineInput;
+  function editorState(){return JSON.stringify([survey.title,survey.description,survey.allow_anonymous,survey.allow_repeat,deadlineRaw,survey.questions]);}
+  let persisted=editorState();
+  function requireSaved(){if(editorState()!==persisted)throw new Error('请先保存草稿，再更换来源或设置授权。');return survey;}
   const kinds=[['single','单选'],['multiple','多选'],['text','文本'],['number','数字']];
   function render() {
     clear();root.append(el('h1','编辑问卷'));
@@ -140,10 +147,20 @@ async function edit() {
       const sourceSelect=selectField('已有题目版本',available.map((x,i)=>[String(i),x.family.label+' · v'+x.version.version_no+' · '+x.version.payload.title]),'0',sourceBox);
       button('选入题目',async()=>{
         if(!pendingImport){const chosen=available[Number(sourceSelect.value)];await save();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:chosen.family.id,question_version_id:chosen.version.id};render();}
-        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;render();}
-        catch(e){if(!e.unknown){pendingImport=null;render();}throw e;}
+        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;persisted=editorState();render();}
+        catch(e){if(!e.unknown){pendingImport=null;persisted=editorState();render();}throw e;}
       },sourceBox);
     }
+    if(bankChoices.length){
+      const box=el('section',undefined,{class:'card'});root.append(box);
+      const choice=selectField('从题库选用默认版',bankChoices.map((x,i)=>[String(i),x.bank.title+' · '+x.entry.label+' · v'+x.entry.version_no]),'0',box);
+      button('从题库选入',async()=>{
+        if(!pendingImport){const x=bankChoices[Number(choice.value)].entry;await save();pendingImport={revision:survey.revision,instance_id:crypto.randomUUID(),question_id:x.question_id,question_version_id:x.default_version_id};render();}
+        try{survey=await api('/surveys/'+sid+'/question-imports','POST',pendingImport);pendingImport=null;persisted=editorState();render();}
+        catch(e){if(!e.unknown){pendingImport=null;persisted=editorState();render();}throw e;}
+      },box);
+    }
+    grantControls(survey,root,async()=>requireSaved(),async updated=>{survey=updated;persisted=editorState();render();});
     survey.questions.forEach((q,index)=>{
       const card=el('fieldset',undefined,{'data-question-id':q.id,'data-kind':q.kind});card.append(el('legend','第 '+(index+1)+' 题'));root.append(card);
       if(q.source){card.append(el('p','来源版本：'+q.source.question_version_id+'。内容已定稿；修改题意请到我的题目派生新版。'));}
@@ -192,6 +209,16 @@ async function edit() {
         });
         button('添加规则',()=>{q.rules.push({op:q.kind==='multiple'?'any':q.kind==='number'?'gte':'eq',operand:q.kind==='multiple'?(q.options[0]?[q.options[0].id]:[]):q.kind==='number'?'0':q.options[0]?.id??crypto.randomUUID(),target:'END'});render();},card).disabled=q.rules.length>=LIMITS.rules;
       }
+      if(q.source){
+        const box=el('section');card.append(box);
+        button('查看确切来源',async()=>{const source=await api('/surveys/'+sid+'/questions/'+q.id+'/source');box.append(el('p','v'+source.version_no+' · '+source.operation+' · 父版本：'+(source.parent_version_id??'无')+' · 恢复来源：'+(source.restored_from_version_id??'无')));},box);
+        const choices=available.filter(x=>x.family.id===q.source.question_id);
+        if(choices.length){
+          const chosen=selectField('换用同家族版本',choices.map(x=>[x.version.id,'v'+x.version.version_no+' · '+x.version.payload.title]),q.source.question_version_id,box);
+          frozenButton('换用版本并清空本题规则',box,async()=>{const target=chosen.value;requireSaved();return {revision:survey.revision,question_id:q.source.question_id,question_version_id:target};},
+            body=>api('/surveys/'+sid+'/questions/'+q.id+'/source','PUT',body),async updated=>{survey=updated;persisted=editorState();render();});
+        }
+      }
       button('上移题目',()=>{move(survey.questions,index,-1);render();},card).disabled=index===0;
       button('下移题目',()=>{move(survey.questions,index,1);render();},card).disabled=index===survey.questions.length-1;
       button('删除题目',()=>{survey.questions.splice(index,1);render();},card);
@@ -199,12 +226,12 @@ async function edit() {
     for(const [kind,label] of kinds)button('添加'+label+'题',()=>{survey.questions.push(newQuestion(kind));render();}).disabled=survey.questions.length>=LIMITS.questions;
     button('保存草稿',async()=>{await save();document.querySelector('#notice').textContent='草稿已保存；待修复项：'+survey.publish_issues.map(v=>{const index=survey.questions.findIndex(q=>q.id===v.question_id);return(index>=0?'第'+(index+1)+'题：':'')+v.message;}).join('；');},root,true);
     button('发布问卷',async()=>{await save();await api('/surveys/'+sid+'/publish','POST',{revision:survey.revision});location.href='/surveys/'+sid+'/manage';},root,true);
-    if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(control.textContent!=='选入题目')control.disabled=true;
+    if(pendingImport)for(const control of root.querySelectorAll('input,textarea,select,button'))if(!['选入题目','从题库选入'].includes(control.textContent))control.disabled=true;
   }
-  async function save(){
+  async function save(renderAfter=true){
     survey.deadline_at=deadlineUTC(deadlineInput);
     const body=Object.fromEntries(['revision','title','description','allow_anonymous','allow_repeat','deadline_at','questions'].map(k=>[k,survey[k]]));
-    survey=await api('/surveys/'+sid+'/draft','PUT',body);deadlineRaw=shanghaiInput(survey.deadline_at);render();
+    survey=await api('/surveys/'+sid+'/draft','PUT',body);deadlineRaw=shanghaiInput(survey.deadline_at);persisted=editorState();if(renderAfter)render();
   }
   render();
 }
@@ -222,6 +249,8 @@ async function manage(){
   const survey=await api('/surveys/'+sid);clear();root.append(el('h1',survey.title),el('p',survey.description),el('p','状态：'+surveyState(survey)+'。发布后内容冻结。'),el('p','当前截止：'+deadlineText(survey.deadline_at),{id:'current-deadline'}));
   const input=field('分享链接',location.origin+'/survey/'+sid,root);input.readOnly=true;
   const links=el('div',undefined,{class:'links'});root.append(links);link('打开填写页','/survey/'+sid,links);link('查看统计','/surveys/'+sid+'/statistics',links);
+  grantControls(survey,root,async()=>survey,async()=>manage());
+  for(const q of survey.questions.filter(q=>q.source))button('查看来源：'+q.title,async()=>{const v=await api('/surveys/'+sid+'/questions/'+q.id+'/source');root.append(el('p','来源 v'+v.version_no+' · '+v.operation+' · 父版本：'+(v.parent_version_id??'无')+' · 恢复来源：'+(v.restored_from_version_id??'无')));});
   if(survey.state==='published'){
     const deadline=field('截止时间（北京时间，可留空）',shanghaiInput(survey.deadline_at),root,'datetime-local');deadline.step='0.001';
     root.append(el('p','截止时间可留空或设为未来时间。到期后可延长截止，关闭后不能重新开放。',{class:'muted'}));
@@ -235,7 +264,7 @@ async function fill() {
   let answers={},key=crypto.randomUUID(),path=[survey.questions[0].id],shown=survey.questions[0].id,frozenBody=null,anonymousChoice=false;
   const questions=Object.fromEntries(survey.questions.map(q=>[q.id,q]));
   function heading(){clear();root.append(el('h1',survey.title),el('p',survey.description));
-    if(survey.result_sharing_notice?.enabled)root.append(el('p','部分题目的汇总结果将提供给题目所有者，不包含账号身份或逐条内容。'));
+    if(survey.result_sharing_notice?.enabled){const ids=new Set(survey.result_sharing_notice.question_instance_ids);root.append(el('p','以下题目的汇总结果将提供给题目所有者，不包含账号身份或逐条内容：'+survey.questions.filter(q=>ids.has(q.id)).map(q=>q.title).join('、')));}
   }
   if(!survey.accepting||(!survey.allow_repeat&&survey.already_submitted)){
     heading();root.append(el('p',!survey.accepting?'问卷已关闭或截止。':'此账号已完成填写。'));return;
@@ -347,67 +376,173 @@ async function loadContents(q,box,offset,limit){
     const account=await api('/auth/me'); document.querySelector('#account').textContent=account.username;
     const logout=document.querySelector('#logout'); logout.hidden=false;
     logout.onclick=async()=>{try{await api('/auth/logout','POST',{});location.href='/login';}catch(e){fail(e);}};
-    await ({list,edit,manage,fill,catalog,statistics:stats}[page])();
+    await ({list,edit,manage,fill,catalog,banks,statistics:stats}[page])();
   } catch(e) {root.replaceChildren(el('h1','暂时无法打开页面'));fail(e);}
 })();
 
 async function catalog(){
-  const families=[];
-  for(let offset=0;;offset+=100){const rows=await api('/questions?offset='+offset+'&limit=100');families.push(...rows.items);if(offset+100>=rows.total)break;}
-  clear();root.append(el('h1','我的题目'));
+  const scope=new URLSearchParams(location.search).get('scope')==='shared'?'shared':'owned';
+  const families=await allItems('/questions?scope='+scope);
+  clear();root.append(el('h1',scope==='shared'?'共享给我的题目':'我的题目'));link('我的题目','/questions');link('共享给我的题目','/questions?scope=shared');link('我的题库','/question-banks');
   const createBox=el('section',undefined,{class:'card'});root.append(createBox);
   const label=field('题目标签','',createBox);
   const kind=selectField('新题类型',[['single','单选'],['multiple','多选'],['text','文本'],['number','数字']],'number',createBox);
   const familyKey=crypto.randomUUID(),versionKey=crypto.randomUUID();
-  let pendingCreate=null;
-  button('创建常用题',async()=>{
+  let pendingCreate=null,versionDirty=false,releaseCreate=null;
+  function requireClean(){if(versionDirty)throw new Error('请先保存题目草稿，再进行其他管理操作。');}
+  const createButton=button('创建常用题',async()=>{
+    requireClean();
     if(!pendingCreate){const fresh=newQuestion(kind.value);delete fresh.id;delete fresh.rules;pendingCreate={family:{label:label.value,creation_key:familyKey},version:{creation_key:versionKey,payload:fresh}};}
-    label.disabled=true;kind.disabled=true;
+    if(!releaseCreate)releaseCreate=lockControls(createButton);
     try{
       const family=await api('/questions','POST',pendingCreate.family);
       const version=await api('/questions/'+family.id+'/versions','POST',pendingCreate.version);
       location.href='/questions?question='+family.id+'&version='+version.id;
-    }catch(e){if(!e.unknown){pendingCreate=null;label.disabled=false;kind.disabled=false;}throw e;}
+    }catch(e){if(!e.unknown){pendingCreate=null;releaseCreate?.();releaseCreate=null;}throw e;}
   },createBox,true);
   for(const family of families){
     const box=el('section',undefined,{class:'card'});root.append(box);
     box.append(el('h2',family.label));
-    link('打开题目','/questions?question='+family.id,box);
+    link('打开题目','/questions?question='+family.id+'&scope='+scope,box);
   }
   const params=new URLSearchParams(location.search),qid=params.get('question');
   if(!qid)return;
   const family=await api('/questions/'+qid),versions=[];
   for(let offset=0;;offset+=100){const rows=await api('/questions/'+qid+'/versions?offset='+offset+'&limit=100');versions.push(...rows.items);if(offset+100>=rows.total)break;}
   const selected=versions.find(v=>v.id===params.get('version'))??versions[0];
+  const familyBox=el('section',undefined,{class:'card',id:'family-management'});root.append(familyBox);
+  familyBox.append(el('h2',family.label));
+  if(family.role==='owner'){
+    const labelInput=field('修改管理标签',family.label,familyBox);
+    frozenButton('保存标签',familyBox,async()=>{requireClean();return {revision:family.revision,label:labelInput.value};},body=>api('/questions/'+qid,'PATCH',body),async()=>catalog());
+    familyBox.append(el('p','共享只授予使用权。接收者不能编辑或转共享；撤回不删除已保存的问卷副本。'));
+    const sharing=field('共享给指定用户名（逗号分隔，留空撤回全部）',(family.shared_with??[]).join(', '),familyBox);
+    frozenButton('保存共享名单',familyBox,async()=>{requireClean();return {revision:family.revision,usernames:sharing.value.split(/[,，]/).map(x=>x.trim()).filter(Boolean)};},body=>api('/questions/'+qid+'/sharing','PUT',body),async()=>catalog());
+  }else familyBox.append(el('p','只读共享：可选用已定稿版本。'));
+  const uses=el('section',undefined,{id:'usage-list'});familyBox.append(uses);
+  async function usages(offset=0){const data=await api('/questions/'+qid+'/usages?limit=20&offset='+offset);uses.replaceChildren(el('h3','使用清单'),el('p','共 '+data.total+' 份问卷；仅显示允许查看的使用关系。'));
+    for(const item of data.items)uses.append(el('p',item.title+' · '+item.survey_id+' · '+surveyState({state:item.state,deadline_at:item.expired?'2000-01-01':null})+' · '+item.versions.map(x=>x.version_id+'：'+x.instance_count+'个实例').join('；')));
+    if(offset)button('上一页使用记录',()=>usages(Math.max(0,offset-20)),uses);
+    if(offset+20<data.total)button('下一页使用记录',()=>usages(offset+20),uses);
+  }
+  await usages();
   if(!selected)return;
   const area=el('section',undefined,{class:'card',id:'version-editor'});root.append(area);
   area.append(el('h2',family.label+' · v'+selected.version_no+' · '+(selected.state==='sealed'?'已定稿':'草稿')));
-  for(const version of versions)link('v'+version.version_no+' '+(version.state==='sealed'?'已定稿':'草稿'),'/questions?question='+qid+'&version='+version.id,area);
+  for(const version of versions)link('v'+version.version_no+' '+(version.state==='sealed'?'已定稿':'草稿'),'/questions?question='+qid+'&scope='+scope+'&version='+version.id,area);
   const value=structuredClone(selected.payload);
-  const content=el('fieldset');content.append(el('legend','版本内容'));area.append(content);
+  const content=el('fieldset');content.addEventListener('input',()=>{versionDirty=true;});content.append(el('legend','版本内容'));area.append(content);
   const title=field('题干',value.title,content);title.oninput=()=>value.title=title.value;
   const required=field('必须回答',value.required,content,'checkbox');required.onchange=()=>value.required=required.checked;
   value.options.forEach((o,i)=>{const input=field('选项 '+(i+1),o.text,content);input.oninput=()=>o.text=input.value;});
-  if(['single','multiple'].includes(value.kind)&&selected.state==='draft')button('添加选项',()=>{value.options.push({id:crypto.randomUUID(),text:''});renderOptions();},content);
+  if(['single','multiple'].includes(value.kind)&&selected.state==='draft')button('添加选项',()=>{value.options.push({id:crypto.randomUUID(),text:''});versionDirty=true;renderOptions();},content);
   function renderOptions(){const o=value.options.at(-1);const input=field('选项 '+value.options.length,o.text,content);input.oninput=()=>o.text=input.value;}
   const limits={multiple:[['min_choices','最少选择数'],['max_choices','最多选择数']],text:[['min_length','最少字数'],['max_length','最多字数']],number:[['min_value','最小值'],['max_value','最大值']]}[value.kind]??[];
   for(const [key,text] of limits){const input=field(text,value.validation[key],content);input.oninput=()=>value.validation[key]=input.value===''?null:value.kind==='number'?input.value:/^\d{1,5}$/.test(input.value)?Number(input.value):input.value;}
   if(value.kind==='number'){const input=field('仅允许整数',value.validation.integer_only,content,'checkbox');input.onchange=()=>value.validation.integer_only=input.checked;}
-  if(selected.parent_version_id)area.append(el('p','派生来源：'+selected.parent_version_id));
+  area.append(el('p','操作：'+selected.operation+' · 父版本：'+(selected.parent_version_id??'无')+' · 恢复来源：'+(selected.restored_from_version_id??'无')));
   if(selected.state==='sealed'){
     for(const control of content.querySelectorAll('input,button'))control.disabled=true;
+    if(family.role==='owner'){
     const key=crypto.randomUUID();
-    button('派生新版',async()=>{const result=await api('/questions/'+qid+'/versions','POST',{creation_key:key,operation:'derive',parent_version_id:selected.id});location.href='/questions?question='+qid+'&version='+result.id;},area,true);
+    frozenButton('派生新版',area,async()=>({creation_key:key,operation:'derive',parent_version_id:selected.id}),body=>api('/questions/'+qid+'/versions','POST',body),async result=>{location.href='/questions?question='+qid+'&version='+result.id;});
+    const restoreKey=crypto.randomUUID();
+    frozenButton('恢复此版为独立新版本',area,async()=>({creation_key:restoreKey,operation:'restore',parent_version_id:selected.id,restored_from_version_id:selected.id}),body=>api('/questions/'+qid+'/versions','POST',body),async result=>{location.href='/questions?question='+qid+'&version='+result.id;});
+    }
     link('创建问卷并选入','/surveys',area);
   }else{
-    let revision=selected.revision,pendingSeal=null;
-    async function save(){const result=await api('/questions/'+qid+'/versions/'+selected.id+'/draft','PUT',{revision,payload:value});revision=result.revision;return result;}
-    const saveButton=button('保存题目草稿',async()=>{const result=await save();document.querySelector('#notice').textContent='题目草稿已保存'+(result.seal_issues.length?'；'+result.seal_issues.map(x=>x.message).join('；'):'');},area,true);
-    button('定稿版本',async()=>{
+    let revision=selected.revision,pendingSeal=null,pendingSave=null,releaseSeal=null,releaseSave=null;
+    async function save(){
+      if(!pendingSave)pendingSave={revision,payload:structuredClone(value)};
+      try{const result=await api('/questions/'+qid+'/versions/'+selected.id+'/draft','PUT',pendingSave);revision=result.revision;versionDirty=false;pendingSave=null;return result;}
+      catch(e){if(!e.unknown)pendingSave=null;throw e;}
+    }
+    const saveButton=button('保存题目草稿',async()=>{
+      if(!releaseSave)releaseSave=lockControls(saveButton);
+      try{const result=await save();releaseSave();releaseSave=null;document.querySelector('#notice').textContent='题目草稿已保存'+(result.seal_issues.length?'；'+result.seal_issues.map(x=>x.message).join('；'):'');}
+      catch(e){if(!e.unknown){releaseSave?.();releaseSave=null;}throw e;}
+    },area,true);
+    const sealButton=button('定稿版本',async()=>{
       try{
+        if(!releaseSeal)releaseSeal=lockControls(sealButton);
         if(!pendingSeal){await save();pendingSeal={revision};content.disabled=true;saveButton.disabled=true;}
         await api('/questions/'+qid+'/versions/'+selected.id+'/seal','POST',pendingSeal);await catalog();
-      }catch(e){if(!e.unknown){pendingSeal=null;content.disabled=false;saveButton.disabled=false;}throw e;}
+      }catch(e){if(!e.unknown){pendingSeal=null;content.disabled=false;releaseSeal?.();releaseSeal=null;}throw e;}
     },area,true);
   }
+}
+
+async function allItems(path){
+  const items=[];
+  for(let offset=0;;offset+=100){const rows=await api(path+(path.includes('?')?'&':'?')+'limit=100&offset='+offset);items.push(...rows.items);if(offset+100>=rows.total)return items;}
+}
+function lockControls(except){
+  const states=Array.from(root.querySelectorAll('input,textarea,select,button')).map(node=>[node,node.disabled]);
+  for(const [node]of states)if(node!==except)node.disabled=true;
+  return ()=>{for(const [node,disabled]of states)if(node!==except)node.disabled=disabled;};
+}
+function frozenButton(text,parent,prepare,send,done){
+  let pending=null,release=null;
+  const control=button(text,async()=>{
+    try{
+      if(!release)release=lockControls(control);
+      if(!pending)pending=structuredClone(await prepare());
+      const result=await send(pending);pending=null;await done(result);
+    }catch(e){
+      if(!e.unknown){pending=null;release?.();release=null;}
+      throw e;
+    }
+  },parent);
+  return control;
+}
+function grantControls(survey,parent,before,done){
+  const external=(survey.result_grant_options??[]).filter(x=>x.external);
+  if(!external.length)return;
+  const box=el('section',undefined,{class:'card',id:'result-grants'});parent.append(box);
+  box.append(el('h2','单题汇总授权'),el('p','默认关闭。开启后，题目所有者可汇总本卷该家族全部实例的回答，不含身份或逐条内容。发布后仅可撤回，撤回后不能重开。'));
+  for(const x of external){
+    const grant=survey.question_result_grants.find(g=>g.question_id===x.question_id);
+    const titles=[...new Set(survey.questions.filter(q=>q.source?.question_id===x.question_id).map(q=>q.title))].join('、');
+    const row=el('section');box.append(row,el('p',titles+'：'+(grant.enabled?'已开启':'已关闭')));
+    if(survey.state==='draft'||grant.enabled){
+      const enabled=survey.state==='draft'?field('允许向题目所有者提供汇总：'+titles,grant.enabled,row,'checkbox'):null;
+      frozenButton(survey.state==='draft'?'保存本家族授权':'撤回本家族授权',row,async()=>{
+        const target=enabled?enabled.checked:false,current=await before();
+        return {revision:current.revision,enabled:target};
+      },body=>api('/surveys/'+survey.id+'/question-result-grants/'+x.question_id,'PUT',body),done);
+    }
+  }
+}
+async function banks(){
+  const rows=await allItems('/question-banks');clear();root.append(el('h1','我的题库'));
+  const createBox=el('section',undefined,{class:'card'});root.append(createBox);
+  const title=field('新题库名称','',createBox),key=crypto.randomUUID();
+  frozenButton('创建题库',createBox,async()=>({title:title.value,creation_key:key}),body=>api('/question-banks','POST',body),async result=>{location.href='/question-banks?bank='+result.id;});
+  for(const item of rows){const box=el('section',undefined,{class:'card'});root.append(box);box.append(el('h2',item.title));link('管理题库','/question-banks?bank='+item.id,box);}
+  const bid=new URLSearchParams(location.search).get('bank');if(!bid)return;
+  const bank=await api('/question-banks/'+bid),choices=[];
+  for(const scope of ['owned','shared'])for(const family of await allItems('/questions?scope='+scope)){
+    for(const version of await allItems('/questions/'+family.id+'/versions'))if(version.state==='sealed')choices.push({family,version});
+  }
+  const area=el('section',undefined,{class:'card',id:'bank-editor'});root.append(area);area.append(el('h2',bank.title),el('p','每个家族保留一个明确默认版；更新默认版或移除条目不会改变已选入的问卷。'));
+  const name=field('题库名称',bank.title,area);
+  const entries=bank.entries.map(x=>({question_id:x.question_id,default_version_id:x.default_version_id}));
+  function body(next=entries){return {revision:bank.revision,title:name.value,entries:next};}
+  frozenButton('保存题库名称',area,async()=>body(),x=>api('/question-banks/'+bid,'PUT',x),async()=>banks());
+  for(const entry of bank.entries){
+    const row=el('section',undefined,{class:'card'});area.append(row);
+    row.append(el('h3',entry.available?entry.label+' · 默认 v'+entry.version_no:'使用权已撤回：'+entry.question_id));
+    if(entry.available){
+      const versions=choices.filter(x=>x.family.id===entry.question_id);
+      const version=selectField('明确选择默认版：'+entry.label,versions.map(x=>[x.version.id,'v'+x.version.version_no+' · '+x.version.payload.title]),entry.default_version_id,row);
+      frozenButton('更新此题默认版',row,async()=>body(entries.map(x=>x.question_id===entry.question_id?{...x,default_version_id:version.value}:x)),x=>api('/question-banks/'+bid,'PUT',x),async()=>banks());
+    }
+    frozenButton('从题库移除',row,async()=>body(entries.filter(x=>x.question_id!==entry.question_id)),x=>api('/question-banks/'+bid,'PUT',x),async()=>banks());
+  }
+  const candidates=choices.filter(x=>!entries.some(y=>y.question_id===x.family.id));
+  if(candidates.length){
+    const selected=selectField('加入题库的确切版本',candidates.map((x,i)=>[String(i),x.family.label+' · v'+x.version.version_no]),'0',area);
+    frozenButton('加入题库',area,async()=>{const x=candidates[Number(selected.value)];return body([...entries,{question_id:x.family.id,default_version_id:x.version.id}]);},x=>api('/question-banks/'+bid,'PUT',x),async()=>banks());
+  }
+  link('创建问卷并从题库选题','/surveys',area);
 }
